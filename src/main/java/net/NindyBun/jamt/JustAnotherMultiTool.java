@@ -1,5 +1,6 @@
 package net.NindyBun.jamt;
 
+import net.NindyBun.jamt.Registries.ModBlocks;
 import net.NindyBun.jamt.Registries.ModCreativeTabs;
 import net.NindyBun.jamt.Registries.ModDataComponents;
 import net.NindyBun.jamt.Registries.ModItems;
@@ -41,6 +42,7 @@ public class JustAnotherMultiTool
 
         ModCreativeTabs.register(modEventBus);
         ModDataComponents.register(modEventBus);
+        ModBlocks.register(modEventBus);
         ModItems.register(modEventBus);
         modEventBus.addListener(Generator::gatherData);
 

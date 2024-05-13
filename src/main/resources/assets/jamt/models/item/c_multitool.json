@@ -16,7 +16,7 @@
 		"12": "jamt:item/c_multitool/grip_left",
 		"13": "jamt:item/c_multitool/grip_right",
 		"14": "jamt:item/c_multitool/grip_top",
-		"particle": "jamt:item/c_multitool/barrel_top"
+		"particle": "jamt:item/c_multitool/barrel_tip"
 	},
 	"elements": [
 		{

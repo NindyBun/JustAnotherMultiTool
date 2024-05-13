@@ -12,5 +12,8 @@ public class Generator {
         PackOutput provider = generator.getPackOutput();
 
         generator.addProvider(event.includeClient(), new GeneratorLang(provider, "en_us"));
+        generator.addProvider(event.includeClient(), new GeneratorItemModels(provider, fileHelper));
+
+        generator.addProvider(event.includeServer(), new GeneratorBlockStates(provider, fileHelper));
     }
 }
