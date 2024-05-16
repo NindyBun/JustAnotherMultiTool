@@ -1,5 +1,6 @@
 package net.NindyBun.jamt.items;
 
+import net.NindyBun.jamt.Enums.Modules;
 import net.NindyBun.jamt.Enums.MultiToolClasses;
 import net.NindyBun.jamt.JustAnotherMultiTool;
 import net.NindyBun.jamt.Registries.ModDataComponents;

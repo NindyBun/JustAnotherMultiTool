@@ -1,9 +1,6 @@
 package net.NindyBun.jamt;
 
-import net.NindyBun.jamt.Registries.ModBlocks;
-import net.NindyBun.jamt.Registries.ModCreativeTabs;
-import net.NindyBun.jamt.Registries.ModDataComponents;
-import net.NindyBun.jamt.Registries.ModItems;
+import net.NindyBun.jamt.Registries.*;
 import net.NindyBun.jamt.capabilities.EnergyCapability;
 import net.NindyBun.jamt.data.Generator;
 import net.NindyBun.jamt.items.AbstractMultiTool;
@@ -44,6 +41,8 @@ public class JustAnotherMultiTool
         ModDataComponents.register(modEventBus);
         ModBlocks.register(modEventBus);
         ModItems.register(modEventBus);
+        ModEntities.register(modEventBus);
+        ModContainers.register(modEventBus);
         modEventBus.addListener(Generator::gatherData);
 
         // Register ourselves for server and other game events we are interested in.
