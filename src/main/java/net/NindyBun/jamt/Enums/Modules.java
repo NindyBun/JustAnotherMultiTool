@@ -3,9 +3,11 @@ package net.NindyBun.jamt.Enums;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.NindyBun.jamt.BiggerStreamCodec;
+import net.NindyBun.jamt.JustAnotherMultiTool;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.common.Tags;
 
 import java.util.List;
@@ -34,6 +36,10 @@ public enum Modules {
 
     public void setCurrentLvl(int level) {
         this.currentLvl = level;
+    }
+
+    public ResourceLocation getImage() {
+        return new ResourceLocation(JustAnotherMultiTool.MODID, "textures/gui/modules/"+this.name+".png");
     }
 
     public void sync(ModuleData data) {

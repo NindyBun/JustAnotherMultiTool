@@ -1,6 +1,7 @@
 package net.NindyBun.jamt.containers;
 
 import net.NindyBun.jamt.Enums.Modules;
+import net.NindyBun.jamt.JustAnotherMultiTool;
 import net.NindyBun.jamt.Registries.ModBlocks;
 import net.NindyBun.jamt.Registries.ModContainers;
 import net.NindyBun.jamt.Tools.Helpers;
@@ -30,7 +31,7 @@ import java.util.List;
 public class ModificationTableContainer extends AbstractContainerMenu {
     private BlockEntity blockEntity;
     private IItemHandler playerInventory;
-    private List<Modules> modulesCache = new ArrayList<>();
+    private List<Modules> moduleCache = new ArrayList<>();
 
     public ModificationTableContainer(int pContainerId, Inventory playerInventory, FriendlyByteBuf buf) {
         super(ModContainers.MODIFICATION_TABLE_CONTAINER.get(), pContainerId);
@@ -58,6 +59,10 @@ public class ModificationTableContainer extends AbstractContainerMenu {
             addSlot(new WatchedSlot(cap, 0, 80, 35, this::updateModuleCache));
     }
 
+    public List<Modules> getModuleCache() {
+        return moduleCache;
+    }
+
     private int addSlotRange(IItemHandler handler, int index, int x, int y, int column, int dx) {
         for (int i = 0; i < column; i++) {
             addSlot(new SlotItemHandler(handler, index, x, y));
@@ -82,13 +87,13 @@ public class ModificationTableContainer extends AbstractContainerMenu {
 
     private void updateModuleCache(int index) {
         ItemStack stack = this.getSlot(index).getItem();
-        if ( (stack.isEmpty() && !modulesCache.isEmpty()) || !(stack.getItem() instanceof AbstractMultiTool) ) {
-            modulesCache.clear();
+        if ( (stack.isEmpty() && !moduleCache.isEmpty()) || !(stack.getItem() instanceof AbstractMultiTool) ) {
+            moduleCache.clear();
             return;
         }
 
-        modulesCache.clear();
-        modulesCache = ToolMethods.getModules(stack);
+        moduleCache.clear();
+        moduleCache = ToolMethods.getModules(stack);
     }
 
     @Override
@@ -99,17 +104,17 @@ public class ModificationTableContainer extends AbstractContainerMenu {
             ItemStack stack = slot.getItem();
             itemStack = stack.copy();
             if (pIndex == 0) {
-                if (!this.moveItemStackTo(stack, 1, this.getItems().size(), true))
+                if (!this.moveItemStackTo(stack, 1, this.getItems().size(), false))
                     return ItemStack.EMPTY;
                 slot.onQuickCraft(stack, itemStack);
             }else{
                 if (stack.getItem() instanceof AbstractMultiTool) {
                     if (!this.moveItemStackTo(stack, 0, 1, false))
                         return ItemStack.EMPTY;
-                }else if (pIndex < 29) {
-                    if (!this.moveItemStackTo(stack, 29, 37, false))
+                }else if (pIndex < 10) {
+                    if (!this.moveItemStackTo(stack, 10, 37, false))
                         return ItemStack.EMPTY;
-                }else if (pIndex < 38 && !this.moveItemStackTo(stack, 1, 29, false)) {
+                }else if (pIndex < 38 && !this.moveItemStackTo(stack, 1, 10, false)) {
                     return ItemStack.EMPTY;
                 }
             }

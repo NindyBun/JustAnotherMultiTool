@@ -3,7 +3,9 @@ package net.NindyBun.jamt.blocks;
 import net.NindyBun.jamt.Registries.ModEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -22,8 +24,11 @@ import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.items.IItemHandler;
 import org.jetbrains.annotations.Nullable;
 
+import java.awt.*;
 import java.util.stream.Stream;
 
 public class ModificationTableBlock extends Block implements EntityBlock{
@@ -60,12 +65,31 @@ public class ModificationTableBlock extends Block implements EntityBlock{
 
     @Override
     protected InteractionResult useWithoutItem(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, BlockHitResult pHitResult) {
-        return super.useWithoutItem(pState, pLevel, pPos, pPlayer, pHitResult);
+        if (!pLevel.isClientSide) {
+            BlockEntity blockEntity = pLevel.getBlockEntity(pPos);
+            if (blockEntity instanceof MenuProvider) {
+                pPlayer.openMenu((MenuProvider) blockEntity, blockEntity.getBlockPos());
+            } else {
+                throw new IllegalStateException("Modification Table Container Provider is missing.");
+            }
+            return InteractionResult.SUCCESS;
+        }
+        return InteractionResult.SUCCESS;
     }
 
     @Override
     protected void onRemove(BlockState pState, Level pLevel, BlockPos pPos, BlockState pNewState, boolean pMovedByPiston) {
-        super.onRemove(pState, pLevel, pPos, pNewState, pMovedByPiston);
+        if (pNewState.getBlock() != this) {
+            BlockEntity blockEntity = pLevel.getBlockEntity(pPos);
+            if (blockEntity != null) {
+                IItemHandler cap = blockEntity.getLevel().getCapability(Capabilities.ItemHandler.BLOCK, blockEntity.getBlockPos(), blockEntity.getBlockState(), blockEntity, null);
+                if (cap == null) return;
+                for (int i = 0; i < cap.getSlots(); i++) {
+                    Containers.dropItemStack(pLevel, pPos.getX(), pPos.getY(), pPos.getZ(), cap.getStackInSlot(i));
+                }
+                super.onRemove(pState, pLevel, pPos, pNewState, pMovedByPiston);
+            }
+        }
     }
 
     private enum Shape {

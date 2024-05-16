@@ -3,9 +3,12 @@ package net.NindyBun.jamt;
 import net.NindyBun.jamt.Registries.*;
 import net.NindyBun.jamt.capabilities.EnergyCapability;
 import net.NindyBun.jamt.data.Generator;
+import net.NindyBun.jamt.entities.ModificationTableEntity;
 import net.NindyBun.jamt.items.AbstractMultiTool;
+import net.NindyBun.jamt.screens.ModificationTableScreen;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
+import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
@@ -57,6 +60,10 @@ public class JustAnotherMultiTool
         event.registerItem(Capabilities.EnergyStorage.ITEM, (itemstack, context) -> new EnergyCapability(itemstack, ((AbstractMultiTool)itemstack.getItem()).getEnergyMax()),
                 ModItems.C_MULTITOOL.get()
             );
+        event.registerBlock(Capabilities.ItemHandler.BLOCK,
+                (level, pos, state, blockEntity, context) -> ((ModificationTableEntity) blockEntity).handler,
+                ModBlocks.MODIFICATION_TABLE.get()
+                );
     }
 
     private void commonSetup(final FMLCommonSetupEvent event)
@@ -76,6 +83,11 @@ public class JustAnotherMultiTool
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event)
         {
+        }
+
+        @SubscribeEvent
+        public static void registerScreens(RegisterMenuScreensEvent event) {
+            event.register(ModContainers.MODIFICATION_TABLE_CONTAINER.get(), ModificationTableScreen::new);
         }
     }
 }

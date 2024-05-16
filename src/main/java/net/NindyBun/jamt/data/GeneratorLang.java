@@ -16,6 +16,8 @@ public class GeneratorLang extends LanguageProvider {
     protected void addTranslations() {
         add("creativetab." + JustAnotherMultiTool.MODID + ".jamt_tab", "Just Another Multi-Tool");
         add("tooltip." + JustAnotherMultiTool.MODID + ".energy", "Energy: %d/%d");
+        add("text." + JustAnotherMultiTool.MODID + ".modification_table", "Modification Table");
+        add("screen." + JustAnotherMultiTool.MODID + ".modification_table", "Modification Table");
 
         add(ModItems.C_MULTITOOL.get(), "Class C Multi-Tool");
 

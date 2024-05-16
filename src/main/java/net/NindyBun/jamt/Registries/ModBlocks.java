@@ -13,7 +13,7 @@ import java.util.function.Supplier;
 public class ModBlocks {
     public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(JustAnotherMultiTool.MODID);
 
-    public static final Supplier<Block> MODIFICATION_TABLE = BLOCKS.register("modification_table", ModificationTableBlock::new);
+    public static final DeferredBlock<Block> MODIFICATION_TABLE = BLOCKS.register("modification_table", ModificationTableBlock::new);
 
     public static void register(IEventBus eventBus) {
         BLOCKS.register(eventBus);
