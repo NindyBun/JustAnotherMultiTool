@@ -107,10 +107,12 @@ public class ModificationTableContainer extends AbstractContainerMenu {
                 if (!this.moveItemStackTo(stack, 1, this.getItems().size(), false))
                     return ItemStack.EMPTY;
                 slot.onQuickCraft(stack, itemStack);
+                this.updateModuleCache(0);
             }else{
                 if (stack.getItem() instanceof AbstractMultiTool) {
                     if (!this.moveItemStackTo(stack, 0, 1, false))
                         return ItemStack.EMPTY;
+                    this.updateModuleCache(0);
                 }else if (pIndex < 10) {
                     if (!this.moveItemStackTo(stack, 10, 37, false))
                         return ItemStack.EMPTY;

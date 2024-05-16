@@ -4,18 +4,23 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.NindyBun.jamt.BiggerStreamCodec;
 import net.NindyBun.jamt.JustAnotherMultiTool;
+import net.NindyBun.jamt.Registries.ModItems;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.common.Tags;
+import net.neoforged.neoforge.registries.DeferredHolder;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 public enum Modules {
     MINING_LASER("mining_laser", 1, 1, List.of(new String[]{
             Tags.Items.INGOTS_IRON.toString()
-    }), true);
+    }), true, ModItems.MINING_LASER);
 
     public final String name;
     public int currentLvl;
@@ -24,14 +29,20 @@ public enum Modules {
     public final double upgradeMaterialMultiplier = 1.5;
     public boolean equipped = false;
     public boolean equippable;
+    public Supplier<Item> item;
 
 
-    Modules(String name, int currentLvl, int maxLvl, List<String> upgradeMaterials, boolean equippable) {
+    Modules(String name, int currentLvl, int maxLvl, List<String> upgradeMaterials, boolean equippable, Supplier<Item> item) {
         this.name = name;
         this.currentLvl = currentLvl;
         this.maxLvl = maxLvl;
         this.upgradeMaterials = upgradeMaterials;
         this.equippable = equippable;
+        this.item = item;
+    }
+
+    public ItemStack getItem() {
+        return new ItemStack(this.item.get());
     }
 
     public void setCurrentLvl(int level) {

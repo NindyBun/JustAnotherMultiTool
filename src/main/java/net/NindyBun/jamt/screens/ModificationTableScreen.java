@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.Tesselator;
 import net.NindyBun.jamt.Enums.Modules;
 import net.NindyBun.jamt.JustAnotherMultiTool;
+import net.NindyBun.jamt.Registries.ModItems;
 import net.NindyBun.jamt.containers.ModificationTableContainer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -14,6 +15,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.client.gui.widget.ScrollPanel;
 
 import java.awt.*;
@@ -36,7 +39,7 @@ public class ModificationTableScreen extends AbstractContainerScreen<Modificatio
     public void render(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
         super.render(pGuiGraphics, pMouseX, pMouseY, pPartialTick);
 
-        //this.scrollingModules.render(pGuiGraphics, pMouseX, pMouseY, pPartialTick);
+        this.scrollingModules.render(pGuiGraphics, pMouseX, pMouseY, pPartialTick);
         this.renderTooltip(pGuiGraphics, pMouseX, pMouseY);
 
         int relX = this.width/2;
@@ -57,11 +60,9 @@ public class ModificationTableScreen extends AbstractContainerScreen<Modificatio
     @Override
     protected void init() {
         super.init();
-        //this.scrollingModules = new ScrollingModules(Minecraft.getInstance(), this.imageWidth-14, 72, topPos+7, leftPos+7, this);
-        //this.addRenderableWidget(this.scrollingModules);
+        this.scrollingModules = new ScrollingModules(Minecraft.getInstance(), 120 , this.imageHeight, topPos, leftPos+this.imageWidth, this);
+        this.addRenderableWidget(this.scrollingModules);
     }
-
-
 
     private static class ScrollingModules extends ScrollPanel implements NarratableEntry {
         ModificationTableScreen screen;
@@ -102,14 +103,21 @@ public class ModificationTableScreen extends AbstractContainerScreen<Modificatio
 
             int index = 0;
             for (Modules module : this.screen.container.getModuleCache()) {
-                guiGraphics.blitSprite(module.getImage(), x, y, 32, 32);
+                guiGraphics.renderItem(module.getItem(), x, y);
+
+                if (isMouseOver(mouseX, mouseY) && (mouseX < x + 15 && mouseY > y && mouseY < y + 15))
+                    currentModule = module;
+
                 x += 22;
                 index++;
-                if (index % 7 == 0) {
+                if (index % 5 == 0) {
                     y += 20;
                     x = (entryRight-this.width) + 3;
                 }
             }
+
+            if (currentModule == null || !currentModule.equals(this.module))
+                this.module = currentModule;
         }
 
         @Override
