@@ -22,7 +22,7 @@ import net.neoforged.neoforge.client.gui.widget.ScrollPanel;
 import java.awt.*;
 
 public class ModificationTableScreen extends AbstractContainerScreen<ModificationTableContainer> {
-    private ResourceLocation GUI = new ResourceLocation(JustAnotherMultiTool.MODID, "textures/gui/modification_table.png");
+    private ResourceLocation GUI = new ResourceLocation(JustAnotherMultiTool.MODID, "textures/gui/modification_table_2.png");
     private BlockPos blockEntityPos;
     private ModificationTableContainer container;
     private Inventory playerInventory;
@@ -43,9 +43,9 @@ public class ModificationTableScreen extends AbstractContainerScreen<Modificatio
         this.renderTooltip(pGuiGraphics, pMouseX, pMouseY);
 
         int relX = this.width/2;
-        int rely = this.height/2;
+        int relY = this.height/2;
 
-        //pGuiGraphics.drawCenteredString(font, Component.translatable("text."+JustAnotherMultiTool.MODID+".modification_table"), relX, rely - 100, Color.BLACK.hashCode());
+        //pGuiGraphics.drawCenteredString(font, Component.translatable("screen."+JustAnotherMultiTool.MODID+".modification_table"), relX+0, relY+0, Color.GRAY.hashCode());
 
     }
 
@@ -54,13 +54,13 @@ public class ModificationTableScreen extends AbstractContainerScreen<Modificatio
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         int relX = (this.width-this.imageWidth)/2;
         int relY = (this.height-this.imageHeight)/2;
-        pGuiGraphics.blit(GUI, relX, relY, 0, 0, this.imageWidth, this.imageHeight);
+        pGuiGraphics.blit(GUI, relX-23, relY, 0, 0, this.imageWidth+29, this.imageHeight);
     }
 
     @Override
     protected void init() {
         super.init();
-        this.scrollingModules = new ScrollingModules(Minecraft.getInstance(), 120 , this.imageHeight, topPos, leftPos+this.imageWidth, this);
+        this.scrollingModules = new ScrollingModules(Minecraft.getInstance(), 18*10-1, 18*3, topPos+16, leftPos-2, this);
         this.addRenderableWidget(this.scrollingModules);
     }
 
@@ -98,21 +98,21 @@ public class ModificationTableScreen extends AbstractContainerScreen<Modificatio
         @Override
         protected void drawPanel(GuiGraphics guiGraphics, int entryRight, int relativeY, Tesselator tess, int mouseX, int mouseY) {
             Modules currentModule = null;
-            int x = (entryRight-this.width) + 3;
-            int y = relativeY;
+            int x = (entryRight-this.width) + 1;
+            int y = relativeY - 3;
 
             int index = 0;
-            for (Modules module : this.screen.container.getModuleCache()) {
-                guiGraphics.renderItem(module.getItem(), x, y);
+            for (int i = 0; i < 60; i++) {
+                guiGraphics.renderItem(ModItems.MINING_LASER.get().getDefaultInstance(), x, y);
 
-                if (isMouseOver(mouseX, mouseY) && (mouseX < x + 15 && mouseY > y && mouseY < y + 15))
+                if (isMouseOver(mouseX, mouseY) && (mouseX > x && mouseX < x + 15 && mouseY > y && mouseY < y + 15))
                     currentModule = module;
 
-                x += 22;
+                x += 18;
                 index++;
-                if (index % 5 == 0) {
-                    y += 20;
-                    x = (entryRight-this.width) + 3;
+                if (index % 10 == 0) {
+                    y += 18;
+                    x = (entryRight-this.width) + 1;
                 }
             }
 
@@ -123,7 +123,6 @@ public class ModificationTableScreen extends AbstractContainerScreen<Modificatio
         @Override
         public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
             super.render(guiGraphics, mouseX, mouseY, partialTick);
-
         }
     }
 }

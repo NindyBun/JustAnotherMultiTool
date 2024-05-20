@@ -56,7 +56,7 @@ public class ModificationTableContainer extends AbstractContainerMenu {
     private void setupContainerSlots() {
         IItemHandler cap = this.blockEntity.getLevel().getCapability(Capabilities.ItemHandler.BLOCK, blockEntity.getBlockPos(), blockEntity.getBlockState(), blockEntity, null);
         if (cap != null)
-            addSlot(new WatchedSlot(cap, 0, 80, 35, this::updateModuleCache));
+            addSlot(new WatchedSlot(cap, 0, -16, 84, this::updateModuleCache));
     }
 
     public List<Modules> getModuleCache() {
