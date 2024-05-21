@@ -12,17 +12,26 @@ import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.neoforged.neoforge.client.gui.widget.ExtendedButton;
 import net.neoforged.neoforge.client.gui.widget.ScrollPanel;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
 import java.awt.*;
+import java.rmi.registry.Registry;
 
 public class ModificationTableScreen extends AbstractContainerScreen<ModificationTableContainer> {
     private ResourceLocation GUI = new ResourceLocation(JustAnotherMultiTool.MODID, "textures/gui/modification_table_2.png");
+    private ResourceLocation SLOT = new ResourceLocation(JustAnotherMultiTool.MODID, "textures/item/modules/slot.png");
+    private ResourceLocation LOCKED_SLOT = new ResourceLocation(JustAnotherMultiTool.MODID, "textures/item/modules/locked_slot.png");
     private BlockPos blockEntityPos;
     private ModificationTableContainer container;
     private Inventory playerInventory;
@@ -60,7 +69,7 @@ public class ModificationTableScreen extends AbstractContainerScreen<Modificatio
     @Override
     protected void init() {
         super.init();
-        this.scrollingModules = new ScrollingModules(Minecraft.getInstance(), 18*10-1, 18*3, topPos+16, leftPos-2, this);
+        this.scrollingModules = new ScrollingModules(Minecraft.getInstance(), 18*10, 18*3, topPos+16, leftPos-2, this);
         this.addRenderableWidget(this.scrollingModules);
     }
 
@@ -69,7 +78,7 @@ public class ModificationTableScreen extends AbstractContainerScreen<Modificatio
         Modules module = null;
 
         ScrollingModules(Minecraft client, int width, int height, int top, int left, ModificationTableScreen screen) {
-            super(client, width, height, top, left);
+            super(client, width, height, top, left, 4, 0);
             this.screen = screen;
         }
 
@@ -85,7 +94,7 @@ public class ModificationTableScreen extends AbstractContainerScreen<Modificatio
 
         @Override
         protected int getContentHeight() {
-            return (int) Math.ceil(this.screen.container.getModuleCache().size()/7f)*20;
+            return (int) Math.ceil(this.screen.container.getModuleCache().size()/10f)*18-(!this.screen.container.getModuleCache().isEmpty() ? 4 : 0);
         }
 
         @Override
@@ -102,12 +111,15 @@ public class ModificationTableScreen extends AbstractContainerScreen<Modificatio
             int y = relativeY - 3;
 
             int index = 0;
-            for (int i = 0; i < 60; i++) {
-                guiGraphics.renderItem(ModItems.MINING_LASER.get().getDefaultInstance(), x, y);
+            for (Item item : BuiltInRegistries.ITEM.stream().toList()) {
+
+                guiGraphics.blit(new ResourceLocation(JustAnotherMultiTool.MODID, "textures/item/modules/slot.png"), x-1, y-1, 0, 0, 32, 32, 18, 18);
+                guiGraphics.renderItem(item.getDefaultInstance(), x, y);
 
                 if (isMouseOver(mouseX, mouseY) && (mouseX > x && mouseX < x + 15 && mouseY > y && mouseY < y + 15))
                     currentModule = module;
 
+                if (index == 60) break;
                 x += 18;
                 index++;
                 if (index % 10 == 0) {
