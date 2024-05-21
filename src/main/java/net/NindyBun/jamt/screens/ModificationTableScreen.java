@@ -11,6 +11,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -116,9 +117,10 @@ public class ModificationTableScreen extends AbstractContainerScreen<Modificatio
                 guiGraphics.blit(new ResourceLocation(JustAnotherMultiTool.MODID, "textures/item/modules/slot.png"), x-1, y-1, 0, 0, 32, 32, 18, 18);
                 guiGraphics.renderItem(item.getDefaultInstance(), x, y);
 
-                if (isMouseOver(mouseX, mouseY) && (mouseX > x && mouseX < x + 15 && mouseY > y && mouseY < y + 15))
+                if (isMouseOver(mouseX, mouseY) && (mouseX > x && mouseX < x + 15 && mouseY > y && mouseY < y + 15)) {
+                    guiGraphics.fill(x, y, x+16, y+16, new Color(Color.GRAY.getRed()/255f, Color.GRAY.getGreen()/255f, Color.GRAY.getBlue()/255f, 0.3f).hashCode());
                     currentModule = module;
-
+                }
                 if (index == 60) break;
                 x += 18;
                 index++;
