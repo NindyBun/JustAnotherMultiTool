@@ -1,16 +1,12 @@
-package net.NindyBun.jamt;
+package net.NindyBun.jamt.Tools;
 
 import com.mojang.datafixers.util.Function7;
-import io.netty.buffer.ByteBuf;
-import net.NindyBun.jamt.Enums.Modules;
-import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 
-import java.util.List;
 import java.util.function.Function;
 
 public interface BiggerStreamCodec<B, V> extends StreamCodec<B, V> {
-    static <B, C, T1, T2, T3, T4, T5, T6, T7> BiggerStreamCodec<B, C> composite(
+    static <B, C, T1, T2, T3, T4, T5, T6, T7> StreamCodec<B, C> composite(
             final StreamCodec<? super B, T1> pCodec1,
             final Function<C, T1> pGetter1,
             final StreamCodec<? super B, T2> pCodec2,
@@ -27,7 +23,7 @@ public interface BiggerStreamCodec<B, V> extends StreamCodec<B, V> {
             final Function<C, T7> pGetter7,
             final Function7<T1, T2, T3, T4, T5, T6, T7, C> pFactory
     ) {
-        return new BiggerStreamCodec<B, C>() {
+        return new StreamCodec<B, C>() {
             @Override
             public C decode(B p_330310_) {
                 T1 t1 = pCodec1.decode(p_330310_);

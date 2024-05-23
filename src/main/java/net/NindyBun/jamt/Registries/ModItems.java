@@ -4,6 +4,7 @@ import net.NindyBun.jamt.Enums.Modules;
 import net.NindyBun.jamt.Enums.MultiToolClasses;
 import net.NindyBun.jamt.JustAnotherMultiTool;
 import net.NindyBun.jamt.items.AbstractMultiTool;
+import net.NindyBun.jamt.items.ModuleCard;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -20,7 +21,7 @@ public class ModItems {
     public static final Supplier<Item> C_MULTITOOL = ITEMS.register("c_multitool", () -> new AbstractMultiTool(MultiToolClasses.C));
     public static final Supplier<BlockItem> MODIFICATION_TABLE_ITEM = ITEMS.register("modification_table", () -> new BlockItem(ModBlocks.MODIFICATION_TABLE.get(), new Item.Properties().stacksTo(64)));
 
-    public static final Supplier<Item> MINING_LASER = MODULES.register("mining_laser", () -> new Item(new Item.Properties()));
+    public static final Supplier<Item> MINING_LASER = MODULES.register("mining_laser", () -> new ModuleCard(Modules.MINING_LASER));
 
     public static void register(IEventBus eventBus) {
         ITEMS.register(eventBus);

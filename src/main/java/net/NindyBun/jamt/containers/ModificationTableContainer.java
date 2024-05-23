@@ -7,6 +7,7 @@ import net.NindyBun.jamt.Registries.ModContainers;
 import net.NindyBun.jamt.Tools.Helpers;
 import net.NindyBun.jamt.Tools.ToolMethods;
 import net.NindyBun.jamt.items.AbstractMultiTool;
+import net.NindyBun.jamt.items.ModuleCard;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
@@ -26,12 +27,14 @@ import net.neoforged.neoforge.items.wrapper.InvWrapper;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ModificationTableContainer extends AbstractContainerMenu {
     private BlockEntity blockEntity;
     private IItemHandler playerInventory;
-    private List<Modules> moduleCache = new ArrayList<>();
+    private MultiToolInventory inventory = new MultiToolInventory();
 
     public ModificationTableContainer(int pContainerId, Inventory playerInventory, FriendlyByteBuf buf) {
         super(ModContainers.MODIFICATION_TABLE_CONTAINER.get(), pContainerId);
@@ -56,11 +59,11 @@ public class ModificationTableContainer extends AbstractContainerMenu {
     private void setupContainerSlots() {
         IItemHandler cap = this.blockEntity.getLevel().getCapability(Capabilities.ItemHandler.BLOCK, blockEntity.getBlockPos(), blockEntity.getBlockState(), blockEntity, null);
         if (cap != null)
-            addSlot(new WatchedSlot(cap, 0, -16, 84, this::updateModuleCache));
+            addSlot(new WatchedSlot(cap, 0, -16, 84, this::update_inventory));
     }
 
-    public List<Modules> getModuleCache() {
-        return moduleCache;
+    public MultiToolInventory getInventory() {
+        return inventory;
     }
 
     private int addSlotRange(IItemHandler handler, int index, int x, int y, int column, int dx) {
@@ -85,15 +88,15 @@ public class ModificationTableContainer extends AbstractContainerMenu {
         addSlotBox(playerInventory, 9, 8, 84, 9, 18, 3, 18);
     }
 
-    private void updateModuleCache(int index) {
+    private void update_inventory(int index) {
         ItemStack stack = this.getSlot(index).getItem();
-        if ( (stack.isEmpty() && !moduleCache.isEmpty()) || !(stack.getItem() instanceof AbstractMultiTool) ) {
-            moduleCache.clear();
+        if ( (stack.isEmpty() && !inventory.get_inventory_map().isEmpty()) || !(stack.getItem() instanceof AbstractMultiTool) ) {
+            inventory.get_inventory_map().clear();;
             return;
         }
 
-        moduleCache.clear();
-        moduleCache = ToolMethods.getModules(stack);
+        inventory.get_inventory_map().clear();
+        inventory = ToolMethods.get_inventory(stack);
     }
 
     @Override
@@ -107,12 +110,12 @@ public class ModificationTableContainer extends AbstractContainerMenu {
                 if (!this.moveItemStackTo(stack, 1, this.getItems().size(), false))
                     return ItemStack.EMPTY;
                 slot.onQuickCraft(stack, itemStack);
-                this.updateModuleCache(0);
+                this.update_inventory(0);
             }else{
                 if (stack.getItem() instanceof AbstractMultiTool) {
                     if (!this.moveItemStackTo(stack, 0, 1, false))
                         return ItemStack.EMPTY;
-                    this.updateModuleCache(0);
+                    this.update_inventory(0);
                 }else if (pIndex < 10) {
                     if (!this.moveItemStackTo(stack, 10, 37, false))
                         return ItemStack.EMPTY;
@@ -140,5 +143,23 @@ public class ModificationTableContainer extends AbstractContainerMenu {
 
     public BlockEntity getTE() {
         return this.blockEntity;
+    }
+
+    public static class Actions {
+        public static Modules insert_module(ModificationTableContainer container, ItemStack held, int slot) {
+            Slot toolSlot = container.slots.get(0);
+            ItemStack tool = toolSlot.getItem();
+
+            if (tool.getItem() instanceof AbstractMultiTool && held.getItem() instanceof ModuleCard) {
+                Modules module = ((ModuleCard) held.getItem()).getModule();
+                MultiToolInventory inventory = ToolMethods.get_inventory(tool);
+
+                Modules old = inventory.get_module(slot);
+                inventory.set_module(slot, module);
+                return old;
+
+            }
+            return null;
+        }
     }
 }

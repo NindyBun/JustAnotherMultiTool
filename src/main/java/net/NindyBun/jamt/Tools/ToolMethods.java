@@ -1,47 +1,38 @@
 package net.NindyBun.jamt.Tools;
 
 import net.NindyBun.jamt.Enums.Modules;
+import net.NindyBun.jamt.JustAnotherMultiTool;
 import net.NindyBun.jamt.Registries.ModDataComponents;
+import net.NindyBun.jamt.containers.MultiToolInventory;
+import net.NindyBun.jamt.containers.MultiToolSlot;
+import net.NindyBun.jamt.items.AbstractMultiTool;
 import net.minecraft.world.item.ItemStack;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class ToolMethods {
-    public static List<Modules.ModuleData> initModuleData(ItemStack stack) {
-        List<Modules.ModuleData> moduleData = new ArrayList<>();
-        Arrays.stream(Modules.values()).toList().forEach(module -> {
-            moduleData.add(new Modules.ModuleData(module.name, module.currentLvl, module.maxLvl, module.upgradeMaterials, module.upgradeMaterialMultiplier, module.equipped, module.equippable));
-        });
-        stack.set(ModDataComponents.MODULES.get(), moduleData);
-        return moduleData;
+    public static List<MultiToolInventory.MultiToolInventoryCODEC> init_inventory(ItemStack stack) {
+        List<MultiToolInventory.MultiToolInventoryCODEC> inventory = new ArrayList<>();
+        if (stack.isEmpty() || !(stack.getItem() instanceof AbstractMultiTool))
+            return inventory;
+        for (int i = 0; i < 60; i++) {
+            //int x = i%10;
+            //int y = i/10;
+            inventory.add(new MultiToolInventory.MultiToolInventoryCODEC("", i, ((AbstractMultiTool) stack.getItem()).getLetter().default_slots[i]));
+        }
+        stack.getOrDefault(ModDataComponents.MULTITOOL_INVENTORY.get(), inventory);
+        return inventory;
     }
 
-    public static void updateModuleData(ItemStack stack, Modules module) {
-        List<Modules.ModuleData> moduleData = stack.getOrDefault(ModDataComponents.MODULES.get(), ToolMethods.initModuleData(stack));
+    public static MultiToolInventory get_inventory(ItemStack stack) {
+        List<MultiToolInventory.MultiToolInventoryCODEC> data = stack.getOrDefault(ModDataComponents.MULTITOOL_INVENTORY.get(), ToolMethods.init_inventory(stack));
+        int[] inventory = new int[60];
 
-        moduleData.forEach(data -> {
-            if (data.moduleName().equals(module.name))
-                data = new Modules.ModuleData(module.name, module.currentLvl, module.maxLvl, module.upgradeMaterials, module.upgradeMaterialMultiplier, module.equipped, module.equippable);
-        });
-
-        stack.set(ModDataComponents.MODULES.get(), moduleData);
-    }
-
-    public static List<Modules> getModules(ItemStack stack) {
-        List<Modules.ModuleData> moduleData = stack.getOrDefault(ModDataComponents.MODULES.get(), ToolMethods.initModuleData(stack));
-
-        List<Modules> modules = new ArrayList<>();
-
-        for (Modules.ModuleData data : moduleData) {
-            Modules module = Modules.valueOf(data.moduleName().toUpperCase());
-            if (module == null)
-                continue;
-            module.sync(data);
-            modules.add(module);
+        for (MultiToolInventory.MultiToolInventoryCODEC d : data) {
+            inventory[d.slotPosition()] = d.slotState();
+            //JustAnotherMultiTool.LOGGER.info("{ " + d.slotPosition().get(0) + ", " + d.slotPosition().get(1) + " } >> " + d.slotState());
         }
 
-        return modules;
+        return new MultiToolInventory(inventory);
     }
 }
