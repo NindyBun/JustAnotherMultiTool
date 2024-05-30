@@ -17,6 +17,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -91,7 +92,7 @@ public class ModificationTableContainer extends AbstractContainerMenu {
     private void update_inventory(int index) {
         ItemStack stack = this.getSlot(index).getItem();
         if ( (stack.isEmpty() && !inventory.get_inventory_map().isEmpty()) || !(stack.getItem() instanceof AbstractMultiTool) ) {
-            inventory.get_inventory_map().clear();;
+            inventory.get_inventory_map().clear();
             return;
         }
 
@@ -146,20 +147,37 @@ public class ModificationTableContainer extends AbstractContainerMenu {
     }
 
     public static class Actions {
-        public static Modules insert_module(ModificationTableContainer container, ItemStack held, int slot) {
+        public static ItemStack insert_module(ModificationTableContainer container, ItemStack held, int slot) {
+            if (slot == -1) return ItemStack.EMPTY;
             Slot toolSlot = container.slots.get(0);
             ItemStack tool = toolSlot.getItem();
 
             if (tool.getItem() instanceof AbstractMultiTool && held.getItem() instanceof ModuleCard) {
-                Modules module = ((ModuleCard) held.getItem()).getModule();
                 MultiToolInventory inventory = ToolMethods.get_inventory(tool);
 
-                Modules old = inventory.get_module(slot);
-                inventory.set_module(slot, module);
+                ItemStack old = inventory.get_inventory_map().get(slot).get_itemStack();
+                inventory.get_inventory_map().get(slot).set_itemStack(held);
+                ToolMethods.set_inventory(tool, inventory);
                 return old;
-
             }
-            return null;
+            return ItemStack.EMPTY;
+        }
+
+        public static ItemStack extract_module(ModificationTableContainer container, int slot) {
+            if (slot == -1) return ItemStack.EMPTY;
+            Slot toolSlot = container.slots.get(0);
+            ItemStack tool = toolSlot.getItem();
+
+            if (tool.getItem() instanceof AbstractMultiTool) {
+                MultiToolInventory inventory = ToolMethods.get_inventory(tool);
+
+                ItemStack old = inventory.get_inventory_map().get(slot).get_itemStack();
+                inventory.get_inventory_map().get(slot).clear();
+                ToolMethods.set_inventory(tool, inventory);
+                return old;
+            }
+
+            return ItemStack.EMPTY;
         }
     }
 }

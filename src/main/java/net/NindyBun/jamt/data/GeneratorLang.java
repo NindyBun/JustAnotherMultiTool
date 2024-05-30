@@ -1,5 +1,6 @@
 package net.NindyBun.jamt.data;
 
+import net.NindyBun.jamt.Enums.Modules;
 import net.NindyBun.jamt.JustAnotherMultiTool;
 import net.NindyBun.jamt.Registries.ModBlocks;
 import net.NindyBun.jamt.Registries.ModItems;
@@ -17,8 +18,13 @@ public class GeneratorLang extends LanguageProvider {
         add("tooltip." + JustAnotherMultiTool.MODID + ".energy", "Energy: %d/%d");
         add("screen." + JustAnotherMultiTool.MODID + ".modification_table", "Modification Table");
 
+        add(ModItems.EMPTY.get(), "");
+        add("tooltip." + JustAnotherMultiTool.MODID + "." + Modules.EMPTY.getName(), "");
+
         add(ModItems.C_MULTITOOL.get(), "Class C Multi-Tool");
         add(ModItems.MINING_LASER.get(), "Tool: Mining Laser");
+        add(ModItems.BOLT_CASTER.get(), "Tool: Bolt Caster");
+
 
         add(ModBlocks.MODIFICATION_TABLE.get(), "Modification Table");
 

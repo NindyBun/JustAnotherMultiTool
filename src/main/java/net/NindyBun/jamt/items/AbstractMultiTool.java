@@ -111,8 +111,6 @@ public class AbstractMultiTool extends Item {
         ItemStack stack = player.getItemInHand(usedHand);
         IEnergyStorage energy = stack.getCapability(Capabilities.EnergyStorage.ITEM);
         if (energy == null) return InteractionResultHolder.pass(stack);
-        if (energy.getEnergyStored() == 0)
-            stack.set(ModDataComponents.ENERGY.get(), Constants.MULTITOOL_BASEMAXPOWER);
         player.startUsingItem(usedHand);
         return InteractionResultHolder.pass(stack);
     }

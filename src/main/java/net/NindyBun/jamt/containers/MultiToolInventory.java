@@ -4,9 +4,11 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.NindyBun.jamt.Enums.Modules;
 import net.NindyBun.jamt.Enums.MultiToolClasses;
+import net.NindyBun.jamt.Registries.ModItems;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +16,7 @@ import java.util.List;
 public class MultiToolInventory {
     private List<MultiToolSlot> inventory_map = new ArrayList<>();
 
-    MultiToolInventory() {
+    public MultiToolInventory() {
         init(new int[]{
                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -23,10 +25,6 @@ public class MultiToolInventory {
                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         });
-    }
-
-    MultiToolInventory(MultiToolClasses letter) {
-        init(letter.default_slots);
     }
 
     public MultiToolInventory(int[] inventory_map) {
@@ -43,20 +41,25 @@ public class MultiToolInventory {
         }
     }
 
-    public void set_module(int slot, Modules module) {
-        this.inventory_map.get(slot).set_module(module);
+    public void deserialize_slot_content(MultiToolInventoryCODEC data) {
+        MultiToolSlot slot = this.get_inventory_map().get(data.slotPosition());
+        slot.set_state(data.slotState());
+        slot.set_module(Modules.valueOf(data.moduleName().toUpperCase()));
+        slot.set_itemStack(data.itemStack().is(ModItems.EMPTY.get()) ? ItemStack.EMPTY : data.itemStack());
     }
 
-    public Modules get_module(int slot) {
-        return this.inventory_map.get(slot).get_module();
+    public MultiToolInventoryCODEC serialize_slot_content(int index) {
+        MultiToolSlot slot = this.inventory_map.get(index);
+        return new MultiToolInventoryCODEC(slot.get_module().getName(), slot.get_index(), slot.get_state(), slot.get_itemStack().isEmpty() ? Modules.EMPTY.getItem() : slot.get_itemStack());
     }
 
-    public record MultiToolInventoryCODEC(String moduleName, int slotPosition, int slotState) {
+    public record MultiToolInventoryCODEC(String moduleName, int slotPosition, int slotState, ItemStack itemStack) {
         public static final Codec<MultiToolInventory.MultiToolInventoryCODEC> CODEC = RecordCodecBuilder.create(
                 instance -> instance.group(
                         Codec.STRING.fieldOf("moduleName").forGetter(MultiToolInventory.MultiToolInventoryCODEC::moduleName),
                         Codec.INT.fieldOf("slotPosition").forGetter(MultiToolInventory.MultiToolInventoryCODEC::slotPosition),
-                        Codec.INT.fieldOf("slotState").forGetter(MultiToolInventory.MultiToolInventoryCODEC::slotState)
+                        Codec.INT.fieldOf("slotState").forGetter(MultiToolInventory.MultiToolInventoryCODEC::slotState),
+                        ItemStack.CODEC.fieldOf("itemStack").forGetter(MultiToolInventory.MultiToolInventoryCODEC::itemStack)
                 ).apply(instance, MultiToolInventory.MultiToolInventoryCODEC::new)
         );
         public static final Codec<List<MultiToolInventory.MultiToolInventoryCODEC>> LIST_CODEC = CODEC.listOf();
@@ -67,6 +70,8 @@ public class MultiToolInventory {
                 MultiToolInventoryCODEC::slotPosition,
                 ByteBufCodecs.INT,
                 MultiToolInventoryCODEC::slotState,
+                ItemStack.STREAM_CODEC,
+                MultiToolInventoryCODEC::itemStack,
                 MultiToolInventory.MultiToolInventoryCODEC::new
         );
     }

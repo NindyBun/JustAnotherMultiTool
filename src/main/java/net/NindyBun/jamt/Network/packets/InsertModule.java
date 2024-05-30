@@ -2,8 +2,11 @@ package net.NindyBun.jamt.Network.packets;
 
 import net.NindyBun.jamt.Enums.Modules;
 import net.NindyBun.jamt.JustAnotherMultiTool;
+import net.NindyBun.jamt.Registries.ModItems;
+import net.NindyBun.jamt.Tools.ToolMethods;
 import net.NindyBun.jamt.containers.ModificationTableContainer;
 import net.NindyBun.jamt.entities.ModificationTableEntity;
+import net.NindyBun.jamt.items.AbstractMultiTool;
 import net.NindyBun.jamt.items.ModuleCard;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -13,6 +16,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
@@ -26,19 +30,19 @@ public class InsertModule {
 
     public void handle(final InsertModuleData data, final IPayloadContext context) {
         context.enqueueWork(() -> {
-           Player player = context.player();
-           Level level = player.level();
-           BlockPos pos = data.pos();
-           BlockEntity blockEntity = level.getBlockEntity(pos);
+            Player player = context.player();
+            Level level = player.level();
+            BlockPos pos = data.pos();
+            BlockEntity blockEntity = level.getBlockEntity(pos);
 
-           if (!(blockEntity instanceof ModificationTableEntity)) return;
+            if (!(blockEntity instanceof ModificationTableEntity)) return;
 
-           ModificationTableContainer container = ((ModificationTableEntity) blockEntity).getContainer(player);
-           ItemStack held = player.containerMenu.getCarried();
-           if (!ItemStack.matches(held, data.held())) return;
+            ModificationTableContainer container = ((ModificationTableEntity) blockEntity).getContainer(player);
+            ItemStack held = player.containerMenu.getCarried();
+            if (!ItemStack.matches(held, data.held())) return;
 
-           Modules set = ModificationTableContainer.Actions.insert_module(container, data.held(), data.slot());
-            player.containerMenu.setCarried(set == null ? ItemStack.EMPTY : new ModuleCard(set).getDefaultInstance());
+            ItemStack set = ModificationTableContainer.Actions.insert_module(container, data.held(), data.slot());
+            player.containerMenu.setCarried(set);
         });
     }
 

@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 public class ModDataComponents {
-    public static final DeferredRegister<DataComponentType<?>> DATA_COMPONENT = DeferredRegister.create(Registries.DATA_COMPONENT_TYPE, JustAnotherMultiTool.MODID);
+    public static final DeferredRegister<DataComponentType<?>> DATA_COMPONENT = DeferredRegister.createDataComponents(JustAnotherMultiTool.MODID);
 
     public static final Supplier<DataComponentType<Integer>> ENERGY = DATA_COMPONENT.register("energy",
             () -> DataComponentType.<Integer>builder().persistent(ExtraCodecs.intRange(0, Integer.MAX_VALUE)).networkSynchronized(ByteBufCodecs.VAR_INT).build());

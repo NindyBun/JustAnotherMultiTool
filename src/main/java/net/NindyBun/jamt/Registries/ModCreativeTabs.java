@@ -22,6 +22,10 @@ public class ModCreativeTabs {
                         ModItems.ITEMS.getEntries().forEach(item -> {
                             pOutput.accept(item.get());
                         });
+                        ModItems.MODULES.getEntries().forEach(module -> {
+                            if (module.get().getDefaultInstance().is(ModItems.EMPTY.get())) return;
+                            pOutput.accept(module.get());
+                        });
                     }))
                     .build());
 

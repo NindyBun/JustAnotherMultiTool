@@ -90,11 +90,12 @@ public class ModificationTableScreen extends AbstractContainerScreen<Modificatio
     public boolean mouseClicked(double pMouseX, double pMouseY, int pButton) {
         ItemStack held = this.menu.getCarried();
         ItemStack tool = this.container.slots.get(0).getItem();
+
         if (!tool.isEmpty() && tool.getItem() instanceof AbstractMultiTool && !held.isEmpty() && held.getItem() instanceof ModuleCard) {
-            if (this.scrollingModules.isMouseOver(pMouseX, pMouseY)) {
-                Modules old = this.scrollingModules.slot == null ? null : this.scrollingModules.slot.get_module();
+            if (this.scrollingModules.isMouseOver(pMouseX, pMouseY) && this.scrollingModules.slot.get_state() == 1) {
+                ItemStack old = this.scrollingModules.slot.get_itemStack();
                 PacketDistributor.sendToServer(new InsertModule.InsertModuleData(this.blockEntityPos, held, this.scrollingModules.slot.get_index()));
-                this.menu.setCarried(old == null ? ItemStack.EMPTY : old.getItem());
+                this.menu.setCarried(old);
             }
         }
         return super.mouseClicked(pMouseX, pMouseY, pButton);
@@ -102,7 +103,7 @@ public class ModificationTableScreen extends AbstractContainerScreen<Modificatio
 
     private static class ScrollingModules extends ScrollPanel implements NarratableEntry {
         ModificationTableScreen screen;
-        MultiToolSlot slot = null;
+        MultiToolSlot slot = MultiToolSlot.EMPTY;
 
         ScrollingModules(Minecraft client, int width, int height, int top, int left, ModificationTableScreen screen) {
             super(client, width, height, top, left, 4, 0);
@@ -133,7 +134,7 @@ public class ModificationTableScreen extends AbstractContainerScreen<Modificatio
 
         @Override
         protected void drawPanel(GuiGraphics guiGraphics, int entryRight, int relativeY, Tesselator tess, int mouseX, int mouseY) {
-            MultiToolSlot currentSlot = null;
+            MultiToolSlot currentSlot = MultiToolSlot.EMPTY;
             int x = (entryRight-this.width) + 1;
             int y = relativeY - 3;
 
@@ -142,8 +143,8 @@ public class ModificationTableScreen extends AbstractContainerScreen<Modificatio
             for (MultiToolSlot slot : map) {
                 guiGraphics.blit(slot.get_state() == 1 ? this.screen.SLOT : this.screen.LOCKED_SLOT, x-1, y-1, 0, 0, 18, 18, 18, 18);
 
-                if (slot.get_module() != null)
-                    guiGraphics.renderItem(slot.get_module().getItem(), x, y);
+                if (!slot.get_itemStack().isEmpty())
+                    guiGraphics.renderItem(slot.get_itemStack(), x, y);
 
                 if (isMouseOver(mouseX, mouseY) && (mouseX > x && mouseX < x + 15 && mouseY > y && mouseY < y + 15) && slot.get_state() == 1) {
                     guiGraphics.fill(x, y, x+16, y+16, new Color(Color.GRAY.getRed()/255f, Color.GRAY.getGreen()/255f, Color.GRAY.getBlue()/255f, 0.3f).hashCode());
@@ -158,23 +159,25 @@ public class ModificationTableScreen extends AbstractContainerScreen<Modificatio
                 }
             }
 
-            if (currentSlot == null || (this.slot != null && !currentSlot.get_module().equals(this.slot.get_module())))
+            if (currentSlot.get_itemStack().isEmpty() || !currentSlot.get_itemStack().equals(this.slot.get_itemStack()))
                 this.slot = currentSlot;
         }
 
         @Override
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
-            if (!isMouseOver(mouseX, mouseY) || this.slot == null)
+            if (!isMouseOver(mouseX, mouseY) || this.slot.get_itemStack().isEmpty() || !this.screen.menu.getCarried().isEmpty())
                 return false;
-            //PacketDistributor.sendToServer(new ExtractModule(this.screen.blockEntityPos, this.module.getName()));
+            ItemStack old = this.screen.scrollingModules.slot.get_itemStack();
+            PacketDistributor.sendToServer(new ExtractModule.ExtractModuleData(this.screen.blockEntityPos, this.slot.get_index()));
+            this.screen.menu.setCarried(old);
             return super.mouseClicked(mouseX, mouseY, button);
         }
 
         @Override
         public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
             super.render(guiGraphics, mouseX, mouseY, partialTick);
-            if (this.slot != null)
-                guiGraphics.renderTooltip(Minecraft.getInstance().font, Lists.transform(this.slot.get_module().getItem().getTooltipLines(Item.TooltipContext.EMPTY, this.screen.getMinecraft().player, TooltipFlag.Default.NORMAL), Component::getVisualOrderText), mouseX, mouseY);
+            if (!this.slot.get_itemStack().isEmpty())
+                guiGraphics.renderTooltip(Minecraft.getInstance().font, Lists.transform(this.slot.get_itemStack().getTooltipLines(Item.TooltipContext.EMPTY, this.screen.getMinecraft().player, TooltipFlag.Default.NORMAL), Component::getVisualOrderText), mouseX, mouseY);
         }
     }
 }

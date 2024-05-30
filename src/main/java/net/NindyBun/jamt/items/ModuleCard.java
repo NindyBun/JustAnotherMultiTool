@@ -3,6 +3,7 @@ package net.NindyBun.jamt.items;
 import net.NindyBun.jamt.Enums.Modules;
 import net.NindyBun.jamt.Registries.ModDataComponents;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
