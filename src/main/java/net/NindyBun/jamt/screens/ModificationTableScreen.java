@@ -95,7 +95,7 @@ public class ModificationTableScreen extends AbstractContainerScreen<Modificatio
             if (this.scrollingModules.isMouseOver(pMouseX, pMouseY) && this.scrollingModules.slot.get_state() == 1) {
                 ItemStack old = this.scrollingModules.slot.get_itemStack();
                 PacketDistributor.sendToServer(new InsertModule.InsertModuleData(this.blockEntityPos, held, this.scrollingModules.slot.get_index()));
-                this.menu.setCarried(old);
+                //this.menu.setCarried(old);
             }
         }
         return super.mouseClicked(pMouseX, pMouseY, pButton);
@@ -146,8 +146,8 @@ public class ModificationTableScreen extends AbstractContainerScreen<Modificatio
                 if (!slot.get_itemStack().isEmpty())
                     guiGraphics.renderItem(slot.get_itemStack(), x, y);
 
-                if (isMouseOver(mouseX, mouseY) && (mouseX > x && mouseX < x + 15 && mouseY > y && mouseY < y + 15) && slot.get_state() == 1) {
-                    guiGraphics.fill(x, y, x+16, y+16, new Color(Color.GRAY.getRed()/255f, Color.GRAY.getGreen()/255f, Color.GRAY.getBlue()/255f, 0.3f).hashCode());
+                if (isMouseOver(mouseX, mouseY) && (mouseX > x-1 && mouseX < x + 16 && mouseY > y-1 && mouseY < y + 16) && slot.get_state() == 1) {
+                    guiGraphics.fill(x-1, y-1, x+17, y+17, new Color(Color.GRAY.getRed()/255f, Color.GRAY.getGreen()/255f, Color.GRAY.getBlue()/255f, 0.3f).hashCode());
                     currentSlot = slot;
                 }
 
