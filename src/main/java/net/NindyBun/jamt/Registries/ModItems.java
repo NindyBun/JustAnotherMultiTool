@@ -21,6 +21,8 @@ public class ModItems {
     public static final Supplier<Item> C_MULTITOOL = ITEMS.register("c_multitool", () -> new AbstractMultiTool(MultiToolClasses.C));
     public static final Supplier<BlockItem> MODIFICATION_TABLE_ITEM = ITEMS.register("modification_table", () -> new BlockItem(ModBlocks.MODIFICATION_TABLE.get(), new Item.Properties().stacksTo(64)));
 
+    public static final Supplier<Item> SLOT_UNLOCKER = ITEMS.register("slot_unlocker", () -> new Item(new Item.Properties().stacksTo(16)));
+
     public static final Supplier<Item> EMPTY = MODULES.register("empty", () -> new ModuleCard(Modules.EMPTY));
     public static final Supplier<Item> MINING_LASER = MODULES.register("mining_laser", () -> new ModuleCard(Modules.MINING_LASER));
     public static final Supplier<Item> BOLT_CASTER = MODULES.register("bolt_caster", () -> new ModuleCard(Modules.BOLT_CASTER));

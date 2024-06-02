@@ -3,6 +3,7 @@ package net.NindyBun.jamt.data;
 import net.NindyBun.jamt.JustAnotherMultiTool;
 import net.NindyBun.jamt.Registries.ModBlocks;
 import net.NindyBun.jamt.Registries.ModItems;
+import net.NindyBun.jamt.items.AbstractMultiTool;
 import net.minecraft.data.PackOutput;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.client.model.generators.ItemModelProvider;
@@ -18,6 +19,13 @@ public class GeneratorItemModels extends ItemModelProvider {
     @Override
     protected void registerModels() {
         registerBlockModel(ModBlocks.MODIFICATION_TABLE);
+
+        ModItems.ITEMS.getEntries().forEach(item -> {
+            if (item.get() instanceof AbstractMultiTool) return;
+            if (item.get().getDefaultInstance().is(ModItems.MODIFICATION_TABLE_ITEM.get())) return;
+            String path = item.getId().getPath();
+            singleTexture(path, mcLoc("item/handheld"), "layer0", modLoc("item/modules/"+path));
+        });
 
         ModItems.MODULES.getEntries().forEach(module -> {
             String path = module.getId().getPath();

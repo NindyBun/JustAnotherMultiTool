@@ -19,7 +19,7 @@ public class GeneratorLang extends LanguageProvider {
         add("screen." + JustAnotherMultiTool.MODID + ".modification_table", "Modification Table");
 
         add(ModItems.EMPTY.get(), "");
-        add("tooltip." + JustAnotherMultiTool.MODID + "." + Modules.EMPTY.getName(), "");
+        add(ModItems.SLOT_UNLOCKER.get(), "Slot Unlocker");
 
         add(ModItems.C_MULTITOOL.get(), "Class C Multi-Tool");
         add(ModItems.MINING_LASER.get(), "Tool: Mining Laser");
