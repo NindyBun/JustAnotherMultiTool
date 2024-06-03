@@ -146,9 +146,11 @@ public class ModificationTableScreen extends AbstractContainerScreen<Modificatio
                 if (!slot.get_itemStack().isEmpty())
                     guiGraphics.renderItem(slot.get_itemStack(), x, y);
 
-                if (isMouseOver(mouseX, mouseY) && (mouseX > x-1 && mouseX < x + 16 && mouseY > y-1 && mouseY < y + 16) && slot.get_state() == 1) {
-                    guiGraphics.fill(x-1, y-1, x+17, y+17, new Color(Color.GRAY.getRed()/255f, Color.GRAY.getGreen()/255f, Color.GRAY.getBlue()/255f, 0.3f).hashCode());
-                    currentSlot = slot;
+                if (isMouseOver(mouseX, mouseY) && (mouseX > x-2 && mouseX < x + 16 && mouseY > y-2 && mouseY < y + 16)) {
+                    if ((slot.get_state() == 1 && !this.screen.menu.getCarried().is(ModItems.SLOT_UNLOCKER.get())) || (slot.get_state() == 0 && this.screen.menu.getCarried().is(ModItems.SLOT_UNLOCKER.get()))) {
+                        guiGraphics.fill(x - 1, y - 1, x + 17, y + 17, new Color(Color.GRAY.getRed() / 255f, Color.GRAY.getGreen() / 255f, Color.GRAY.getBlue() / 255f, 0.3f).hashCode());
+                        currentSlot = slot;
+                    }
                 }
 
                 x += 18;
@@ -169,7 +171,7 @@ public class ModificationTableScreen extends AbstractContainerScreen<Modificatio
                 return false;
             ItemStack old = this.screen.scrollingModules.slot.get_itemStack();
             PacketDistributor.sendToServer(new ExtractModule.ExtractModuleData(this.screen.blockEntityPos, this.slot.get_index()));
-            this.screen.menu.setCarried(old);
+            //this.screen.menu.setCarried(old);
             return super.mouseClicked(mouseX, mouseY, button);
         }
 

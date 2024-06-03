@@ -66,9 +66,9 @@ public class MultiToolInventory {
         public static final StreamCodec<RegistryFriendlyByteBuf, MultiToolInventory.MultiToolInventoryCODEC> STREAM_CODEC = StreamCodec.composite(
                 ByteBufCodecs.STRING_UTF8,
                 MultiToolInventory.MultiToolInventoryCODEC::moduleName,
-                ByteBufCodecs.INT,
+                ByteBufCodecs.VAR_INT,
                 MultiToolInventoryCODEC::slotPosition,
-                ByteBufCodecs.INT,
+                ByteBufCodecs.VAR_INT,
                 MultiToolInventoryCODEC::slotState,
                 ItemStack.STREAM_CODEC,
                 MultiToolInventoryCODEC::itemStack,
