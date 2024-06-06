@@ -7,6 +7,7 @@ import net.NindyBun.jamt.Registries.ModItems;
 import net.NindyBun.jamt.containers.MultiToolInventory;
 import net.NindyBun.jamt.containers.MultiToolSlot;
 import net.NindyBun.jamt.items.AbstractMultiTool;
+import net.NindyBun.jamt.screens.ModificationTableScreen;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.*;
@@ -22,8 +23,15 @@ public class ToolMethods {
 
     public static void set_inventory(ItemStack stack, MultiToolInventory inventory) {
         List<MultiToolInventory.MultiToolInventoryCODEC> data = new ArrayList<>();
+        Map<String, Integer> map = new HashMap<>();
         for (MultiToolSlot slot : inventory.get_inventory_map()) {
             data.add(inventory.serialize_slot_content(slot.get_index()));
+            map.put(slot.get_module().getName(), map.getOrDefault(slot.get_module().getName(), 0) + (slot.get_module() != Modules.EMPTY ? 1 : 0));
+        }
+        for (Map.Entry<String, Integer> m : map.entrySet()) {
+            int count = m.getValue();
+            if (count > 1)
+                stack.set(ModDataComponents.OVERLOADED.get(), true);
         }
         stack.set(ModDataComponents.MULTITOOL_INVENTORY.get(), data);
     }

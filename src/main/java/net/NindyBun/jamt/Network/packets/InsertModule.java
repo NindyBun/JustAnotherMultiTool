@@ -42,6 +42,7 @@ public class InsertModule {
             if (!ItemStack.matches(held, data.held())) return;
 
             ItemStack set = ModificationTableContainer.Actions.insert_module(container, data.held(), data.slot());
+            container.getTE().setChanged();
             player.containerMenu.setCarried(set);
         });
     }

@@ -28,6 +28,9 @@ public class ModDataComponents {
     public static final Supplier<DataComponentType<List<MultiToolInventory.MultiToolInventoryCODEC>>> MULTITOOL_INVENTORY = DATA_COMPONENT.register("multitool_inventory",
             () -> DataComponentType.<List<MultiToolInventory.MultiToolInventoryCODEC>>builder().persistent(MultiToolInventory.MultiToolInventoryCODEC.LIST_CODEC).networkSynchronized(MultiToolInventory.MultiToolInventoryCODEC.STREAM_CODEC.apply(ByteBufCodecs.list())).build());
 
+    public static final Supplier<DataComponentType<Boolean>> OVERLOADED = DATA_COMPONENT.register("overloaded",
+            () -> DataComponentType.<Boolean>builder().persistent(Codec.BOOL).networkSynchronized(ByteBufCodecs.BOOL).build());
+
     public static void register(IEventBus eventBus) {
         DATA_COMPONENT.register(eventBus);
     }

@@ -11,19 +11,21 @@ import net.minecraft.world.item.Items;
 import java.util.function.Supplier;
 
 public enum Modules {
-    EMPTY("empty", ModItems.EMPTY),
-    MINING_LASER("mining_laser", ModItems.MINING_LASER),
-    BOLT_CASTER("bolt_caster", ModItems.BOLT_CASTER),
+    EMPTY("empty", ModItems.EMPTY, "empty"),
+    MINING_LASER("mining_laser", ModItems.MINING_LASER, "tool"),
+    BOLT_CASTER("bolt_caster", ModItems.BOLT_CASTER, "tool"),
     ;
 
     private final String name;
     private Supplier<Item> item;
     private final String tooltip;
+    private final String type;
 
-    Modules(String name, Supplier<Item> item) {
+    Modules(String name, Supplier<Item> item, String type) {
         this.name = name;
         this.item = item;
         this.tooltip = "tooltip."+JustAnotherMultiTool.MODID+"."+name;
+        this.type = type;
     }
 
     public ItemStack getItem() {
@@ -36,6 +38,10 @@ public enum Modules {
 
     public String getToolTip() {
         return this.tooltip;
+    }
+
+    public String getType() {
+        return this.type;
     }
 
 }

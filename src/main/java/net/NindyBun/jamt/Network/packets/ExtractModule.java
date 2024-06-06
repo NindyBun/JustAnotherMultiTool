@@ -37,6 +37,7 @@ public class ExtractModule {
             if (!held.isEmpty()) return;
 
             ItemStack set = ModificationTableContainer.Actions.extract_module(container, data.slot());
+            container.getTE().setChanged();
             player.containerMenu.setCarried(set);
 
         });

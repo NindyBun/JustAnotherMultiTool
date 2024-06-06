@@ -4,6 +4,7 @@ import net.NindyBun.jamt.Enums.Modules;
 import net.NindyBun.jamt.JustAnotherMultiTool;
 import net.NindyBun.jamt.Registries.ModBlocks;
 import net.NindyBun.jamt.Registries.ModContainers;
+import net.NindyBun.jamt.Registries.ModItems;
 import net.NindyBun.jamt.Tools.Helpers;
 import net.NindyBun.jamt.Tools.ToolMethods;
 import net.NindyBun.jamt.items.AbstractMultiTool;
@@ -151,12 +152,18 @@ public class ModificationTableContainer extends AbstractContainerMenu {
             if (slot == -1) return ItemStack.EMPTY;
             Slot toolSlot = container.slots.get(0);
             ItemStack tool = toolSlot.getItem();
+            if (tool.getItem() instanceof AbstractMultiTool && held.is(ModItems.SLOT_UNLOCKER.get())) {
+                MultiToolInventory inventory = ToolMethods.get_inventory(tool);
 
-            if (tool.getItem() instanceof AbstractMultiTool && held.getItem() instanceof ModuleCard) {
+                inventory.get_inventory_map().get(slot).set_state(1);
+                ToolMethods.set_inventory(tool, inventory);
+                return ItemStack.EMPTY;
+            }else if (tool.getItem() instanceof AbstractMultiTool && held.getItem() instanceof ModuleCard) {
                 MultiToolInventory inventory = ToolMethods.get_inventory(tool);
 
                 ItemStack old = inventory.get_inventory_map().get(slot).get_itemStack();
                 inventory.get_inventory_map().get(slot).set_itemStack(held);
+                inventory.get_inventory_map().get(slot).set_module(((ModuleCard) held.getItem()).getModule());
                 ToolMethods.set_inventory(tool, inventory);
                 return old;
             }

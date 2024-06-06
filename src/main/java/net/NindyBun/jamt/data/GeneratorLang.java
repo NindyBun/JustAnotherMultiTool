@@ -17,6 +17,7 @@ public class GeneratorLang extends LanguageProvider {
         add("creativetab." + JustAnotherMultiTool.MODID + ".jamt_tab", "Just Another Multi-Tool");
         add("tooltip." + JustAnotherMultiTool.MODID + ".energy", "Energy: %d/%d");
         add("screen." + JustAnotherMultiTool.MODID + ".modification_table", "Modification Table");
+        add("screen." + JustAnotherMultiTool.MODID + ".tool_amount", "Tools: ");
 
         add(ModItems.EMPTY.get(), "");
         add(ModItems.SLOT_UNLOCKER.get(), "Slot Unlocker");
