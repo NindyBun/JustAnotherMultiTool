@@ -7,9 +7,11 @@ import net.NindyBun.jamt.data.Generator;
 import net.NindyBun.jamt.entities.ModificationTableEntity;
 import net.NindyBun.jamt.items.AbstractMultiTool;
 import net.NindyBun.jamt.screens.ModificationTableScreen;
+import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
+import net.neoforged.neoforge.event.level.BlockEvent;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
@@ -55,7 +57,6 @@ public class JustAnotherMultiTool
         NeoForge.EVENT_BUS.register(this);
         modEventBus.addListener(PacketHandler::registerPackets);
         modEventBus.addListener(this::registerCapabilities);
-
     }
 
     private void registerCapabilities(RegisterCapabilitiesEvent event) {

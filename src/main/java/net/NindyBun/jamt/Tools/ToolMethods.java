@@ -8,7 +8,11 @@ import net.NindyBun.jamt.containers.MultiToolInventory;
 import net.NindyBun.jamt.containers.MultiToolSlot;
 import net.NindyBun.jamt.items.AbstractMultiTool;
 import net.NindyBun.jamt.screens.ModificationTableScreen;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.*;
 
@@ -45,5 +49,16 @@ public class ToolMethods {
         }
 
         return inventory;
+    }
+
+    public static boolean canToolAffect(ItemStack toolStack, Level world, BlockPos pos) {
+        Item toolItem = toolStack.getItem();
+        BlockState state = world.getBlockState(pos);
+
+        if (state.getDestroySpeed(world, pos) < 0) {
+            return false;
+        }
+
+        return toolItem.isCorrectToolForDrops(toolStack, state) || !state.requiresCorrectToolForDrops() && toolItem.getDestroySpeed(toolStack, state) > 1.0F;
     }
 }
