@@ -40,8 +40,12 @@ public class VectorFunctions {
         Level world = player.getCommandSenderWorld();
 
         BlockHitResult hitResult = VectorFunctions.getLookingAt(player, player.blockInteractionRange());
-        if (hitResult.getType() == HitResult.Type.MISS || player.isSecondaryUseActive() || radius <= 0 || !ToolMethods.canToolAffect(stack, world, pos)) {
+        if (hitResult.getType() == HitResult.Type.MISS || player.isSecondaryUseActive() || !ToolMethods.canToolAffect(stack, world, pos)) {
             return ImmutableList.of();
+        }
+
+        if (radius == 0) {
+            return ToolMethods.canToolAffect(stack, world, pos) ? ImmutableList.of(hitResult.getBlockPos()) : ImmutableList.of();
         }
 
         int yMin = -1;

@@ -156,7 +156,7 @@ public class AbstractMultiTool extends Item {
             BlockPos pos = hit.getBlockPos();
             stack.set(ModDataComponents.LAST_BLOCKPOS.get(), new BlockPos(pos.getX(), pos.getY(), pos.getZ()));
 
-            ImmutableList<BlockPos> area = VectorFunctions.getBreakableArea(stack, pos, player, 1);
+            ImmutableList<BlockPos> area = player.isCrouching() ? ImmutableList.of(pos) : VectorFunctions.getBreakableArea(stack, pos, player, 1);
             float s = 0F;
             for (BlockPos p : area) {
                 s += world.getBlockState(p).getDestroySpeed(world, p);
@@ -173,25 +173,29 @@ public class AbstractMultiTool extends Item {
             }
 
             for (BlockPos blockPos : area) {
-                BlockState blockState = world.getBlockState(blockPos);
-                world.destroyBlock(blockPos, false);
-                List<ItemStack> blockDrops = blockState.getDrops(new LootParams.Builder((ServerLevel) world)
-                        .withParameter(LootContextParams.TOOL, stack)
-                        .withParameter(LootContextParams.ORIGIN, blockPos.getCenter())
-                        .withParameter(LootContextParams.BLOCK_STATE, blockState));
-                int blockXP = blockState.getExpDrop(world, world.random, blockPos,0, 0);
-                if (!blockDrops.isEmpty()){
-                    blockDrops.forEach(drop -> {
-                        world.addFreshEntity(new ItemEntity(world, blockPos.getX()+0.5, blockPos.getY()+0.5, blockPos.getZ()+0.5, drop.copy()));
-                    });
-                }
-                blockState.getBlock().popExperience((ServerLevel) world, blockPos, blockXP);
+                mineBlock(world, blockPos, stack);
             }
 
             stack.set(ModDataComponents.DESTROY_PROGRESS.get(), 0.0F);
             stack.set(ModDataComponents.LAST_BLOCKPOS.get(), new BlockPos(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE));
 
         }
+    }
+
+    public void mineBlock(Level world, BlockPos blockPos, ItemStack stack) {
+        BlockState blockState = world.getBlockState(blockPos);
+        world.destroyBlock(blockPos, false);
+        List<ItemStack> blockDrops = blockState.getDrops(new LootParams.Builder((ServerLevel) world)
+                .withParameter(LootContextParams.TOOL, stack)
+                .withParameter(LootContextParams.ORIGIN, blockPos.getCenter())
+                .withParameter(LootContextParams.BLOCK_STATE, blockState));
+        int blockXP = blockState.getExpDrop(world, world.random, blockPos,0, 0);
+        if (!blockDrops.isEmpty()){
+            blockDrops.forEach(drop -> {
+                world.addFreshEntity(new ItemEntity(world, blockPos.getX()+0.5, blockPos.getY()+0.5, blockPos.getZ()+0.5, drop.copy()));
+            });
+        }
+        blockState.getBlock().popExperience((ServerLevel) world, blockPos, blockXP);
     }
 
     @Override
