@@ -9,6 +9,7 @@ import net.NindyBun.jamt.containers.MultiToolSlot;
 import net.NindyBun.jamt.items.AbstractMultiTool;
 import net.NindyBun.jamt.screens.ModificationTableScreen;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -60,5 +61,12 @@ public class ToolMethods {
         }
 
         return toolItem.isCorrectToolForDrops(toolStack, state) || !state.requiresCorrectToolForDrops() && toolItem.getDestroySpeed(toolStack, state) > 1.0F;
+    }
+
+    public static boolean isHoldingTool(Player player) {
+        if ((player.getItemInHand(player.getUsedItemHand()).getItem() instanceof AbstractMultiTool)) {
+            return true;
+        }
+        return false;
     }
 }

@@ -58,7 +58,7 @@ public class InsertModule {
         public static final StreamCodec<RegistryFriendlyByteBuf, InsertModuleData> STREAM_CODEC = StreamCodec.composite(
                 BlockPos.STREAM_CODEC, InsertModuleData::pos,
                 ItemStack.STREAM_CODEC, InsertModuleData::held,
-                ByteBufCodecs.VAR_INT, InsertModuleData::slot,
+                ByteBufCodecs.INT, InsertModuleData::slot,
                 InsertModuleData::new
         );
     }

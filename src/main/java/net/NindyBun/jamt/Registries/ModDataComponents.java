@@ -3,7 +3,9 @@ package net.NindyBun.jamt.Registries;
 import com.mojang.serialization.Codec;
 import net.NindyBun.jamt.Enums.Modules;
 import net.NindyBun.jamt.JustAnotherMultiTool;
+import net.NindyBun.jamt.Tools.Codecs;
 import net.NindyBun.jamt.containers.MultiToolInventory;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -30,6 +32,12 @@ public class ModDataComponents {
 
     public static final Supplier<DataComponentType<Boolean>> OVERLOADED = DATA_COMPONENT.register("overloaded",
             () -> DataComponentType.<Boolean>builder().persistent(Codec.BOOL).networkSynchronized(ByteBufCodecs.BOOL).build());
+
+    public static final Supplier<DataComponentType<Float>> DESTROY_PROGRESS = DATA_COMPONENT.register("destroy_progress",
+            () -> DataComponentType.<Float>builder().persistent(Codec.FLOAT).networkSynchronized(ByteBufCodecs.FLOAT).build());
+
+    public static final Supplier<DataComponentType<BlockPos>> LAST_BLOCKPOS = DATA_COMPONENT.register("last_blockpos",
+            () -> DataComponentType.<BlockPos>builder().persistent(BlockPos.CODEC).networkSynchronized(BlockPos.STREAM_CODEC).build() );
 
     public static void register(IEventBus eventBus) {
         DATA_COMPONENT.register(eventBus);

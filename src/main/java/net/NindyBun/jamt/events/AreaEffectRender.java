@@ -6,6 +6,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.SheetedDecalTextureGenerator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.NindyBun.jamt.JustAnotherMultiTool;
+import net.NindyBun.jamt.Registries.ModDataComponents;
+import net.NindyBun.jamt.Tools.ToolMethods;
 import net.NindyBun.jamt.Tools.VectorFunctions;
 import net.NindyBun.jamt.items.AbstractMultiTool;
 import net.minecraft.client.Camera;
@@ -23,6 +25,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -30,6 +34,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RenderHighlightEvent;
+import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 
 import java.util.List;
 
@@ -37,11 +42,10 @@ import java.util.List;
 public class AreaEffectRender {
 
     @SubscribeEvent
-    public static void renderBlockHighlights(RenderHighlightEvent.Block event) {
-        if (event.isCanceled()) {
+    public static void render(RenderLevelStageEvent event) {
+        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS) {
             return;
         }
-
         Player player = Minecraft.getInstance().player;
         ItemStack stack = player.getMainHandItem();
 
@@ -50,7 +54,11 @@ public class AreaEffectRender {
         }
 
         Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
-        BlockPos target = event.getTarget().getBlockPos();
+        BlockHitResult hit = VectorFunctions.getLookingAt(player, player.blockInteractionRange());
+        if (hit.getType() == HitResult.Type.MISS) {
+            return;
+        }
+        BlockPos target = hit.getBlockPos();
         ImmutableList<BlockPos> area = VectorFunctions.getBreakableArea(stack, target, player, 1);
 
         PoseStack poseStack = event.getPoseStack();
@@ -65,41 +73,41 @@ public class AreaEffectRender {
 
         poseStack.pushPose();
         for (BlockPos blockPos : area) {
-            if (world.getWorldBorder().isWithinBounds(blockPos) && !blockPos.equals(target)) {
+            if (world.getWorldBorder().isWithinBounds(blockPos)) {
                 renderHitOutline(poseStack, vertexBuilder, viewEntity, x, y, z, blockPos, world.getBlockState(blockPos));
             }
         }
         poseStack.popPose();
-
-        MultiPlayerGameMode gameMode = Minecraft.getInstance().gameMode;
-        if (gameMode == null || !gameMode.isDestroying()) {
-            return;
-        }
-        drawBlockDestroyProgress(gameMode, event.getPoseStack(), Minecraft.getInstance().gameRenderer.getMainCamera(), player.getCommandSenderWorld(), area, target);
+        drawBlockDestroyProgress(event.getPoseStack(), Minecraft.getInstance().gameRenderer.getMainCamera(), player.getCommandSenderWorld(), area, stack);
     }
 
-    private static void drawBlockDestroyProgress(MultiPlayerGameMode gameMode, PoseStack posestack, Camera camera, Level level, List<BlockPos> area, BlockPos orig) {
-        double d0 = camera.getPosition().x;
-        double d1 = camera.getPosition().y;
-        double d2 = camera.getPosition().z;
-        int progress = gameMode.getDestroyStage();
-        if (progress < 0 || progress > 10) {
+    @SubscribeEvent
+    public static void renderBlockHighlights(RenderHighlightEvent.Block event) {
+        Player player = Minecraft.getInstance().player;
+        if (ToolMethods.isHoldingTool(player)) {
+            event.setCanceled(true);
+        }
+    }
+
+    private static void drawBlockDestroyProgress(PoseStack posestack, Camera camera, Level level, List<BlockPos> area, ItemStack stack) {
+        double d0 = camera.getPosition().x();
+        double d1 = camera.getPosition().y();
+        double d2 = camera.getPosition().z();
+        float destroyProgress = stack.getOrDefault(ModDataComponents.DESTROY_PROGRESS.get(), 0.0F);
+        int progress = Math.min(destroyProgress > 0.0F ? (int)(destroyProgress * 10.0F) : -1, 9);
+        if (progress < 0 || progress > 9) {
             return;
         }
-        //progress = Math.min(progress + 1, 9); // Ensure that for whatever reason the progress level doesn't go OOB.
-        //JustAnotherMultiTool.LOGGER.info(progress+"");
+
         BlockRenderDispatcher dispatcher = Minecraft.getInstance().getBlockRenderer();
-        VertexConsumer vertexBuilder = Minecraft.getInstance().renderBuffers().crumblingBufferSource().getBuffer(ModelBakery.DESTROY_TYPES.get(progress));
+        VertexConsumer vertexBuilder = Minecraft.getInstance().renderBuffers().bufferSource().getBuffer(ModelBakery.DESTROY_TYPES.get(progress));
 
         for (BlockPos pos : area) {
-            if (!pos.equals(orig)) {
-                posestack.pushPose();
-                posestack.translate((double) pos.getX() - d0, (double) pos.getY() - d1, (double) pos.getZ() - d2);
-                PoseStack.Pose matrixEntry = posestack.last();
-                VertexConsumer matrixBuilder = new SheetedDecalTextureGenerator(vertexBuilder, matrixEntry, 1F);
-                dispatcher.renderBreakingTexture(level.getBlockState(pos), pos, level, posestack, matrixBuilder);
-                posestack.popPose();
-            }
+            posestack.pushPose();
+            posestack.translate((double) pos.getX() - d0, (double) pos.getY() - d1, (double) pos.getZ() - d2);
+            VertexConsumer matrixBuilder = new SheetedDecalTextureGenerator(vertexBuilder, posestack.last(), 1F);
+            dispatcher.renderBreakingTexture(level.getBlockState(pos), pos, level, posestack, matrixBuilder);
+            posestack.popPose();
         }
     }
 
