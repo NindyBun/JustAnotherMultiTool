@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.SheetedDecalTextureGenerator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.NindyBun.jamt.Enums.Modules;
 import net.NindyBun.jamt.JustAnotherMultiTool;
 import net.NindyBun.jamt.Registries.ModDataComponents;
 import net.NindyBun.jamt.Tools.ToolMethods;
@@ -49,7 +50,7 @@ public class AreaEffectRender {
         Player player = Minecraft.getInstance().player;
         ItemStack stack = ToolMethods.getTool(player);
 
-        if (!ToolMethods.isHoldingTool(player)) {
+        if (!ToolMethods.isHoldingTool(player) || !stack.getOrDefault(ModDataComponents.SELECTED_MODULE.get(), Modules.EMPTY.getName()).equals(Modules.MINING_LASER.getName())) {
             return;
         }
 

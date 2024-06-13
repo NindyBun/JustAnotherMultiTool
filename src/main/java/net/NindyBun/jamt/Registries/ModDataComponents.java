@@ -36,6 +36,9 @@ public class ModDataComponents {
     public static final Supplier<DataComponentType<Float>> DESTROY_PROGRESS = DATA_COMPONENT.register("destroy_progress",
             () -> DataComponentType.<Float>builder().persistent(Codec.FLOAT).networkSynchronized(ByteBufCodecs.FLOAT).build());
 
+    public static final Supplier<DataComponentType<Integer>> FIRE_RATE = DATA_COMPONENT.register("fire_rate",
+            () -> DataComponentType.<Integer>builder().persistent(Codec.INT).networkSynchronized(ByteBufCodecs.INT).build());
+
     public static final Supplier<DataComponentType<BlockPos>> LAST_BLOCKPOS = DATA_COMPONENT.register("last_blockpos",
             () -> DataComponentType.<BlockPos>builder().persistent(BlockPos.CODEC).networkSynchronized(BlockPos.STREAM_CODEC).build());
 

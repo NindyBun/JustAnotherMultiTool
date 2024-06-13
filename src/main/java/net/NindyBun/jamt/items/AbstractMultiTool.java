@@ -32,9 +32,14 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.Arrow;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.component.Tool;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -56,7 +61,10 @@ import net.neoforged.neoforge.energy.IEnergyStorage;
 import net.neoforged.neoforge.event.EventHooks;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 
@@ -164,6 +172,9 @@ public class AbstractMultiTool extends Item {
         if (selected.equals(Modules.MINING_LASER.getName())) {
             if (world.isClientSide) player.playSound(ModSounds.MINING_LASER_START.get(), 1f, 1f);
         }
+        if (selected.equals(Modules.BOLT_CASTER.getName())) {
+            if (!player.isUsingItem() && !world.isClientSide) stack.set(ModDataComponents.FIRE_RATE.get(), (int) Modules.BOLT_CASTER.getGroup().get(Modules.Group.FIRE_RATE));
+        }
 
         player.startUsingItem(usedHand);
         return InteractionResultHolder.pass(stack);
@@ -188,6 +199,13 @@ public class AbstractMultiTool extends Item {
                 useMiningLaser(world, player, stack);
             return;
         }
+        if (selected.equals(Modules.BOLT_CASTER.getName())) {
+            if (!world.isClientSide) {
+                useBoltCaster(world, player, stack);
+            }
+            return;
+        }
+
     }
 
     @Override
@@ -205,7 +223,29 @@ public class AbstractMultiTool extends Item {
             pLivingEntity.stopUsingItem();
     }
 
-    public void useMiningLaser(Level world, Player player, ItemStack stack) {
+    private Projectile createProjectile(Level pLevel, LivingEntity pShooter, ItemStack pAmmo) {
+            ArrowItem arrowitem = (ArrowItem) (pAmmo.getItem() instanceof ArrowItem ? pAmmo.getItem() : Items.ARROW);
+            return arrowitem.createArrow(pLevel, pAmmo, pShooter);
+    }
+
+    private void useBoltCaster(Level world, Player player, ItemStack stack) {
+        int fireRate = (int) Modules.valueOf(stack.getOrDefault(ModDataComponents.SELECTED_MODULE.get(), Modules.EMPTY.getName()).toUpperCase()).getGroup().get(Modules.Group.FIRE_RATE);
+        int currentTick = Math.min(stack.getOrDefault(ModDataComponents.FIRE_RATE.get(), (int) Modules.BOLT_CASTER.getGroup().get(Modules.Group.FIRE_RATE)) + 1, fireRate);
+        stack.set(ModDataComponents.FIRE_RATE.get(), currentTick);
+        if (currentTick != fireRate) return;
+
+        //Projectile projectile = this.createProjectile(world, player, Items.ARROW.getDefaultInstance());
+        //EntityHitResult hitResult = VectorFunctions.getEntityLookingAt(player, 16);
+        //this.shoot(world, player, 10f, 0, hitResult == null ? null : hitResult.getEntity());
+
+        Projectile projectile = this.createProjectile(world, player, Items.ARROW.getDefaultInstance());
+        projectile.shootFromRotation(player, player.getRotationVector().x, player.getRotationVector().y, 0, 3.15f, 0);
+        world.addFreshEntity(projectile);
+
+        stack.set(ModDataComponents.FIRE_RATE.get(), 0);
+    }
+
+    private void useMiningLaser(Level world, Player player, ItemStack stack) {
         EntityHitResult entityHitResult = VectorFunctions.getEntityLookingAt(player, player.blockInteractionRange());
         if (entityHitResult != null) {
             Entity entity = entityHitResult.getEntity();
@@ -247,7 +287,7 @@ public class AbstractMultiTool extends Item {
         stack.set(ModDataComponents.LAST_BLOCKPOS.get(), new BlockPos(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE));
     }
 
-    public void mineBlock(Level world, BlockPos blockPos, ItemStack stack) {
+    private void mineBlock(Level world, BlockPos blockPos, ItemStack stack) {
         BlockState blockState = world.getBlockState(blockPos);
         world.destroyBlock(blockPos, false);
         List<ItemStack> blockDrops = blockState.getDrops(new LootParams.Builder((ServerLevel) world)
@@ -274,6 +314,7 @@ public class AbstractMultiTool extends Item {
             return;
         }
         if (!ToolMethods.isUsingTool(player)) {
+            pStack.set(ModDataComponents.FIRE_RATE.get(), 0);
             pStack.set(ModDataComponents.DESTROY_PROGRESS.get(), 0.0F);
             pStack.set(ModDataComponents.LAST_BLOCKPOS.get(), new BlockPos(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE));
         }

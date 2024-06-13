@@ -5,7 +5,9 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.math.Axis;
+import net.NindyBun.jamt.Enums.Modules;
 import net.NindyBun.jamt.JustAnotherMultiTool;
+import net.NindyBun.jamt.Registries.ModDataComponents;
 import net.NindyBun.jamt.Tools.ToolMethods;
 import net.NindyBun.jamt.items.AbstractMultiTool;
 import net.minecraft.client.Minecraft;
@@ -40,6 +42,10 @@ public class MiningLaserRender {
         Player player = Minecraft.getInstance().player;
 
         if (!ToolMethods.isHoldingTool(player) || !ToolMethods.isUsingTool(player)) {
+            return;
+        }
+
+        if (!ToolMethods.getTool(player).getOrDefault(ModDataComponents.SELECTED_MODULE.get(), Modules.EMPTY.getName()).equals(Modules.MINING_LASER.getName())) {
             return;
         }
 
