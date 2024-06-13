@@ -12,6 +12,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.sounds.SoundEngine;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -24,10 +25,14 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageSources;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.component.Tool;
 import net.minecraft.world.level.BlockGetter;
@@ -40,9 +45,7 @@ import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSet;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.HitResult;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.*;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
@@ -203,6 +206,13 @@ public class AbstractMultiTool extends Item {
     }
 
     public void useMiningLaser(Level world, Player player, ItemStack stack) {
+        EntityHitResult entityHitResult = VectorFunctions.getEntityLookingAt(player, player.blockInteractionRange());
+        if (entityHitResult != null) {
+            Entity entity = entityHitResult.getEntity();
+            entity.hurt(new DamageSource(world.damageSources().generic().typeHolder(), player, player), 2);
+            return;
+        }
+
         BlockHitResult hit = VectorFunctions.getLookingAt(player, player.blockInteractionRange());
         BlockPos lastPos = stack.getOrDefault(ModDataComponents.LAST_BLOCKPOS.get(), new BlockPos(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE));
         if (hit.getType() == HitResult.Type.MISS || !lastPos.equals(new BlockPos(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE)) && !lastPos.equals(hit.getBlockPos()) || !ToolMethods.canToolAffect(stack, world, hit.getBlockPos())) {

@@ -47,7 +47,7 @@ public class AreaEffectRender {
             return;
         }
         Player player = Minecraft.getInstance().player;
-        ItemStack stack = player.getMainHandItem().getItem() instanceof AbstractMultiTool ? player.getMainHandItem() : player.getOffhandItem();
+        ItemStack stack = ToolMethods.getTool(player);
 
         if (!ToolMethods.isHoldingTool(player)) {
             return;

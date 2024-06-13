@@ -2,25 +2,40 @@ package net.NindyBun.jamt.Tools;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.HitResult;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class VectorFunctions {
 
-    public static BlockHitResult getLookingAt(Player player, double range) {
-        return getLookingAt(player, ClipContext.Fluid.NONE, range);
+    public static EntityHitResult getEntityLookingAt(Player player, double range) {
+        Vec3 look = player.getLookAngle();
+        Vec3 start = new Vec3(player.getX(), player.getY() + player.getEyeHeight(), player.getZ());
+        Vec3 end = new Vec3(player.getX() + look.x * range, player.getY() + player.getEyeHeight() + look.y * range, player.getZ() + look.z * range);
+        EntityHitResult entityhitresult = ProjectileUtil.getEntityHitResult(
+                player.level(), player, start, end, new AABB(start, end).inflate(1.0), p_156765_ -> !p_156765_.isSpectator(), 0.0F
+        );
+        if (entityhitresult == null || entityhitresult.getType() != HitResult.Type.ENTITY) {
+            return null;
+        }
+
+        Entity entity = entityhitresult.getEntity();
+        BlockHitResult hitResult1 = VectorFunctions.getLookingAt(player, entity.position().distanceTo(start));
+        if (hitResult1.getType() == HitResult.Type.BLOCK) {
+            return null;
+        }
+        return entityhitresult;
     }
 
-    public static BlockHitResult getLookingAt(Player player, ItemStack tool, double range) {
+    public static BlockHitResult getLookingAt(Player player, double range) {
         return getLookingAt(player, ClipContext.Fluid.NONE, range);
     }
 
