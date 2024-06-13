@@ -5,15 +5,21 @@ import net.NindyBun.jamt.Enums.Modules;
 import net.NindyBun.jamt.Enums.MultiToolClasses;
 import net.NindyBun.jamt.JustAnotherMultiTool;
 import net.NindyBun.jamt.Registries.ModDataComponents;
+import net.NindyBun.jamt.Registries.ModSounds;
 import net.NindyBun.jamt.Tools.*;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.sounds.SoundEngine;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
@@ -26,6 +32,7 @@ import net.minecraft.world.item.*;
 import net.minecraft.world.item.component.Tool;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.loot.LootContext;
@@ -41,6 +48,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.common.data.SoundDefinitionsProvider;
 import net.neoforged.neoforge.energy.IEnergyStorage;
 import net.neoforged.neoforge.event.EventHooks;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
@@ -51,6 +59,7 @@ import java.util.Optional;
 
 public class AbstractMultiTool extends Item {
     private final MultiToolClasses letter;
+    private ModSounds.LoopMiningLaserSound loopMiningLaserSound;
 
     public AbstractMultiTool(MultiToolClasses letter) {
         super(new Item.Properties().stacksTo(1).setNoRepair());
@@ -128,11 +137,31 @@ public class AbstractMultiTool extends Item {
         tooltip.add(energyText.withStyle(ChatFormatting.GREEN));
     }
 
+    @OnlyIn(Dist.CLIENT)
+    public void loopSound(Player player, ItemStack stack) {
+        if (loopMiningLaserSound == null) {
+            loopMiningLaserSound = new ModSounds.LoopMiningLaserSound(player, 1f, player.level().random);
+            Minecraft.getInstance().getSoundManager().play(loopMiningLaserSound);
+        }
+    }
+
     @Override
     public InteractionResultHolder<ItemStack> use(Level world, Player player, InteractionHand usedHand) {
         ItemStack stack = player.getItemInHand(usedHand);
         IEnergyStorage energy = stack.getCapability(Capabilities.EnergyStorage.ITEM);
         if (energy == null) return InteractionResultHolder.pass(stack);
+
+        String selected = stack.getOrDefault(ModDataComponents.SELECTED_MODULE.get(), Modules.EMPTY.getName());
+        if (ToolMethods.get_module_tools(stack).size() > 4 || stack.getOrDefault(ModDataComponents.OVERLOADED.get(), false) || selected.equals(Modules.EMPTY.getName())) {
+            if (world.isClientSide) player.playSound(ModSounds.ERROR.get(), 0.45f, 1f);
+            return InteractionResultHolder.fail(stack);
+        }
+
+        //energy.receiveEnergy(-Constants.MULTITOOL_BASEPOWER, false);
+        if (selected.equals(Modules.MINING_LASER.getName())) {
+            if (world.isClientSide) player.playSound(ModSounds.MINING_LASER_START.get(), 1f, 1f);
+        }
+
         player.startUsingItem(usedHand);
         return InteractionResultHolder.pass(stack);
     }
@@ -144,42 +173,68 @@ public class AbstractMultiTool extends Item {
         IEnergyStorage energy = stack.getCapability(Capabilities.EnergyStorage.ITEM);
         if (energy == null) return;
 
-        if (!world.isClientSide) {
-            //energy.receiveEnergy(-Constants.MULTITOOL_BASEPOWER, false);
-            BlockHitResult hit = VectorFunctions.getLookingAt(player, player.blockInteractionRange());
-            BlockPos lastPos = stack.getOrDefault(ModDataComponents.LAST_BLOCKPOS.get(), new BlockPos(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE));
-            if (hit.getType() == HitResult.Type.MISS || !lastPos.equals(new BlockPos(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE)) && !lastPos.equals(hit.getBlockPos()) || !ToolMethods.canToolAffect(stack, world, hit.getBlockPos())) {
-                stack.set(ModDataComponents.DESTROY_PROGRESS.get(), 0.0F);
-                stack.set(ModDataComponents.LAST_BLOCKPOS.get(), new BlockPos(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE));
-                return;
-            }
-            BlockPos pos = hit.getBlockPos();
-            stack.set(ModDataComponents.LAST_BLOCKPOS.get(), new BlockPos(pos.getX(), pos.getY(), pos.getZ()));
+        String selected = stack.getOrDefault(ModDataComponents.SELECTED_MODULE.get(), Modules.EMPTY.getName());
+        if (selected.equals(Modules.EMPTY.getName())) return;
 
-            ImmutableList<BlockPos> area = player.isCrouching() ? ImmutableList.of(pos) : VectorFunctions.getBreakableArea(stack, pos, player, 1);
-            float s = 0F;
-            for (BlockPos p : area) {
-                s += world.getBlockState(p).getDestroySpeed(world, p);
+        //energy.receiveEnergy(-Constants.MULTITOOL_BASEPOWER, false);
+        if (selected.equals(Modules.MINING_LASER.getName())) {
+            if (world.isClientSide) {
+                this.loopSound(player, stack);
             }
-            float blockDestroySpeed = s/area.size();
-            float toolDestroySpeed = Tiers.IRON.getSpeed();
-            float finalDestroySpeed = toolDestroySpeed/(blockDestroySpeed*30);
-            float currentDestorySpeed = stack.getOrDefault(ModDataComponents.DESTROY_PROGRESS.get(), 0.0F) + finalDestroySpeed;
-            stack.set(ModDataComponents.DESTROY_PROGRESS.get(), currentDestorySpeed);
+            if (!world.isClientSide)
+                useMiningLaser(world, player, stack);
+            return;
+        }
+    }
 
-            int destroyStage = Math.min(currentDestorySpeed > 0.0F ? (int)(currentDestorySpeed * 10.0F) : -1, 9);
-            if (destroyStage != 9) {
-                return;
+    @Override
+    public void releaseUsing(ItemStack pStack, Level pLevel, LivingEntity pLivingEntity, int pTimeCharged) {
+        if (pLevel.isClientSide) {
+            if (this.loopMiningLaserSound != null) {
+                if (!this.loopMiningLaserSound.isStopped()) {
+                    pLivingEntity.playSound(ModSounds.MINING_LASER_END.get(), 1f, 1f);
+                }
+                this.loopMiningLaserSound = null;
             }
+        }
 
-            for (BlockPos blockPos : area) {
-                mineBlock(world, blockPos, stack);
-            }
+        if (pLivingEntity instanceof Player)
+            pLivingEntity.stopUsingItem();
+    }
 
+    public void useMiningLaser(Level world, Player player, ItemStack stack) {
+        BlockHitResult hit = VectorFunctions.getLookingAt(player, player.blockInteractionRange());
+        BlockPos lastPos = stack.getOrDefault(ModDataComponents.LAST_BLOCKPOS.get(), new BlockPos(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE));
+        if (hit.getType() == HitResult.Type.MISS || !lastPos.equals(new BlockPos(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE)) && !lastPos.equals(hit.getBlockPos()) || !ToolMethods.canToolAffect(stack, world, hit.getBlockPos())) {
             stack.set(ModDataComponents.DESTROY_PROGRESS.get(), 0.0F);
             stack.set(ModDataComponents.LAST_BLOCKPOS.get(), new BlockPos(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE));
-
+            return;
         }
+        BlockPos pos = hit.getBlockPos();
+        stack.set(ModDataComponents.LAST_BLOCKPOS.get(), new BlockPos(pos.getX(), pos.getY(), pos.getZ()));
+
+        ImmutableList<BlockPos> area = player.isCrouching() ? ImmutableList.of(pos) : VectorFunctions.getBreakableArea(stack, pos, player, 1);
+        float s = 0F;
+        for (BlockPos p : area) {
+            s += world.getBlockState(p).getDestroySpeed(world, p);
+        }
+        float blockDestroySpeed = s/area.size();
+        float toolDestroySpeed = Tiers.IRON.getSpeed();
+        float finalDestroySpeed = toolDestroySpeed/(blockDestroySpeed*30);
+        float currentDestorySpeed = stack.getOrDefault(ModDataComponents.DESTROY_PROGRESS.get(), 0.0F) + finalDestroySpeed;
+        stack.set(ModDataComponents.DESTROY_PROGRESS.get(), currentDestorySpeed);
+
+        int destroyStage = Math.min(currentDestorySpeed > 0.0F ? (int)(currentDestorySpeed * 10.0F) : -1, 9);
+        if (destroyStage != 9) {
+            return;
+        }
+
+        for (BlockPos blockPos : area) {
+            mineBlock(world, blockPos, stack);
+        }
+
+        stack.set(ModDataComponents.DESTROY_PROGRESS.get(), 0.0F);
+        stack.set(ModDataComponents.LAST_BLOCKPOS.get(), new BlockPos(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE));
     }
 
     public void mineBlock(Level world, BlockPos blockPos, ItemStack stack) {
@@ -208,7 +263,7 @@ public class AbstractMultiTool extends Item {
         if (!ToolMethods.isHoldingTool(player)) {
             return;
         }
-        if (!player.isUsingItem()) {
+        if (!ToolMethods.isUsingTool(player)) {
             pStack.set(ModDataComponents.DESTROY_PROGRESS.get(), 0.0F);
             pStack.set(ModDataComponents.LAST_BLOCKPOS.get(), new BlockPos(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE));
         }

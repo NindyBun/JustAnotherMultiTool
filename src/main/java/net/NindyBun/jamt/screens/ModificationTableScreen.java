@@ -142,7 +142,8 @@ public class ModificationTableScreen extends AbstractContainerScreen<Modificatio
             int x = (entryRight-this.width) + 1;
             int y = relativeY - 3;
 
-            int type_count = 0;
+            this.screen.type_overloaded = false;
+            this.screen.type_count = 0;
 
             List<MultiToolSlot> modules = this.screen.container.getInventory().get_inventory_map();
             Map<String, SlotDiff> map = new HashMap<>();
@@ -153,10 +154,9 @@ public class ModificationTableScreen extends AbstractContainerScreen<Modificatio
 
                 if (!slot.get_itemStack().isEmpty()) {
                     guiGraphics.renderItem(slot.get_itemStack(), x, y);
-                    type_count += (slot.get_module().getType().equals("tool") ? 1 : 0);
+                    this.screen.type_count += (slot.get_module().getType().equals("tool") ? 1 : 0);
                     map.put(slot.get_module().getName(), map.getOrDefault(slot.get_module().getName(), new SlotDiff()).add_dupe_count().add_pos(x, y));
                 }
-                this.screen.type_count = type_count;
 
                 if (isMouseOver(mouseX, mouseY) && (mouseX > x-2 && mouseX < x + 17 && mouseY > y-2 && mouseY < y + 17)) {
                     if ((slot.get_state() == 1 && !this.screen.menu.getCarried().is(ModItems.SLOT_UNLOCKER.get())) || (slot.get_state() == 0 && this.screen.menu.getCarried().is(ModItems.SLOT_UNLOCKER.get()))) {
@@ -173,18 +173,17 @@ public class ModificationTableScreen extends AbstractContainerScreen<Modificatio
                 }
             }
 
-            boolean type_overloaded = type_count > 4;
+            this.screen.type_overloaded = this.screen.type_count > 4;
             for (Map.Entry<String, SlotDiff> entry : map.entrySet()) {
                 String name = entry.getKey();
                 SlotDiff diff = entry.getValue();
                 if (diff.get_dupe_count() > 1) {
-                    type_overloaded = true;
+                    this.screen.type_overloaded = true;
                     for (int[] pos : diff.get_positions()) {
                         guiGraphics.fill(pos[0] - 1, pos[1] - 1, pos[0] + 17, pos[1] + 17, Color.RED.hashCode());
                     }
                 }
             }
-            this.screen.type_overloaded = type_overloaded;
 
             if (currentSlot.get_itemStack().isEmpty() || !currentSlot.get_itemStack().equals(this.slot.get_itemStack()))
                 this.slot = currentSlot;

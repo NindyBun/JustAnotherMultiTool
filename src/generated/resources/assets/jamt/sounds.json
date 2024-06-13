@@ -1,0 +1,26 @@
+{
+  "mining_laser_end": {
+    "sounds": [
+      "jamt:mining_laser_end"
+    ],
+    "subtitle": "subtitles.jamt.mining_laser_end"
+  },
+  "mining_laser_loop": {
+    "sounds": [
+      "jamt:mining_laser_loop"
+    ],
+    "subtitle": "subtitles.jamt.mining_laser_loop"
+  },
+  "mining_laser_start": {
+    "sounds": [
+      "jamt:mining_laser_start"
+    ],
+    "subtitle": "subtitles.jamt.mining_laser_start"
+  },
+  "tool_error": {
+    "sounds": [
+      "jamt:tool_error"
+    ],
+    "subtitle": "subtitles.jamt.tool_error"
+  }
+}

@@ -13,6 +13,7 @@ public class Generator {
 
         generator.addProvider(event.includeClient(), new GeneratorLang(provider, "en_us"));
         generator.addProvider(event.includeClient(), new GeneratorItemModels(provider, fileHelper));
+        generator.addProvider(event.includeClient(), new GeneratorSounds(provider, fileHelper));
 
         generator.addProvider(event.includeServer(), new GeneratorBlockStates(provider, fileHelper));
     }

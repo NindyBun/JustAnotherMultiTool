@@ -2,6 +2,7 @@ package net.NindyBun.jamt.Registries;
 
 import net.NindyBun.jamt.JustAnotherMultiTool;
 import net.NindyBun.jamt.containers.ModificationTableContainer;
+import net.NindyBun.jamt.screens.MultiToolRadialMenu;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.inventory.MenuType;
 import net.neoforged.bus.api.IEventBus;

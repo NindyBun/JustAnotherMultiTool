@@ -19,6 +19,11 @@ public class GeneratorLang extends LanguageProvider {
         add("screen." + JustAnotherMultiTool.MODID + ".modification_table", "Modification Table");
         add("screen." + JustAnotherMultiTool.MODID + ".tool_amount", "Tools: ");
 
+        add("subtitles." + JustAnotherMultiTool.MODID + ".tool_error", "Tool Malfunctioned");
+        add("subtitles." + JustAnotherMultiTool.MODID + ".mining_laser_start", "Mining Laser Started");
+        add("subtitles." + JustAnotherMultiTool.MODID + ".mining_laser_loop", "Mining Laser Looping");
+        add("subtitles." + JustAnotherMultiTool.MODID + ".mining_laser_end", "Mining Laser Ended");
+
         add(ModItems.EMPTY.get(), "");
         add(ModItems.SLOT_UNLOCKER.get(), "Slot Unlocker");
 

@@ -37,7 +37,10 @@ public class ModDataComponents {
             () -> DataComponentType.<Float>builder().persistent(Codec.FLOAT).networkSynchronized(ByteBufCodecs.FLOAT).build());
 
     public static final Supplier<DataComponentType<BlockPos>> LAST_BLOCKPOS = DATA_COMPONENT.register("last_blockpos",
-            () -> DataComponentType.<BlockPos>builder().persistent(BlockPos.CODEC).networkSynchronized(BlockPos.STREAM_CODEC).build() );
+            () -> DataComponentType.<BlockPos>builder().persistent(BlockPos.CODEC).networkSynchronized(BlockPos.STREAM_CODEC).build());
+
+    public static final Supplier<DataComponentType<String>> SELECTED_MODULE = DATA_COMPONENT.register("selected_module",
+            () -> DataComponentType.<String>builder().persistent(Codec.STRING).networkSynchronized(ByteBufCodecs.STRING_UTF8).build());
 
     public static void register(IEventBus eventBus) {
         DATA_COMPONENT.register(eventBus);
