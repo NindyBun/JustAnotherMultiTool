@@ -20,7 +20,7 @@ public enum Modules {
             .put(Group.GROUP_NAME, "bolt_caster")
             .put(Group.GROUP_COLOR, Color.ORANGE)
             .put(Group.BASE_DAMAGE, 2.5f)
-            .put(Group.FIRE_RATE, 10)),
+            .put(Group.FIRE_RATE, 2)),
     ;
 
     private final String name;

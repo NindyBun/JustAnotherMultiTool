@@ -171,12 +171,21 @@ public class AbstractMultiTool extends Item {
         //energy.receiveEnergy(-Constants.MULTITOOL_BASEPOWER, false);
         if (selected.equals(Modules.MINING_LASER.getName())) {
             if (world.isClientSide) player.playSound(ModSounds.MINING_LASER_START.get(), 1f, 1f);
+            player.startUsingItem(usedHand);
+            return InteractionResultHolder.pass(stack);
         }
         if (selected.equals(Modules.BOLT_CASTER.getName())) {
-            if (!player.isUsingItem() && !world.isClientSide) stack.set(ModDataComponents.FIRE_RATE.get(), (int) Modules.BOLT_CASTER.getGroup().get(Modules.Group.FIRE_RATE));
+            if (stack.getOrDefault(ModDataComponents.COOLDOWN.get(), 0) == 0) {
+                if (!world.isClientSide) {
+                    stack.set(ModDataComponents.FIRE_RATE.get(), (int) Modules.BOLT_CASTER.getGroup().get(Modules.Group.FIRE_RATE));
+                    useBoltCaster(world, player, stack);
+                    player.startUsingItem(usedHand);
+                }
+            } else {
+                return InteractionResultHolder.pass(stack);
+            }
         }
 
-        player.startUsingItem(usedHand);
         return InteractionResultHolder.pass(stack);
     }
 
@@ -243,6 +252,7 @@ public class AbstractMultiTool extends Item {
         world.addFreshEntity(projectile);
 
         stack.set(ModDataComponents.FIRE_RATE.get(), 0);
+        stack.set(ModDataComponents.COOLDOWN.get(), 20);
     }
 
     private void useMiningLaser(Level world, Player player, ItemStack stack) {
@@ -310,6 +320,10 @@ public class AbstractMultiTool extends Item {
             return;
         }
         Player player = (Player)pEntity;
+        if (pStack.getOrDefault(ModDataComponents.COOLDOWN.get(), 0) > 0) {
+            pStack.set(ModDataComponents.COOLDOWN.get(), Math.max(0, pStack.getOrDefault(ModDataComponents.COOLDOWN.get(), 0)-1));
+        }
+
         if (!ToolMethods.isHoldingTool(player)) {
             return;
         }

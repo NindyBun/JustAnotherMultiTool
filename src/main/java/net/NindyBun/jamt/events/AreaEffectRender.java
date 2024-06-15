@@ -85,7 +85,7 @@ public class AreaEffectRender {
     @SubscribeEvent
     public static void renderBlockHighlights(RenderHighlightEvent.Block event) {
         Player player = Minecraft.getInstance().player;
-        if (ToolMethods.isHoldingTool(player)) {
+        if (ToolMethods.isHoldingTool(player) && ToolMethods.getTool(player).getOrDefault(ModDataComponents.SELECTED_MODULE.get(), Modules.EMPTY.getName()).equals(Modules.MINING_LASER.getName())) {
             event.setCanceled(true);
         }
     }
