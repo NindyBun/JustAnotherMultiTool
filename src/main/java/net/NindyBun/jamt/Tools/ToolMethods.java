@@ -1,6 +1,7 @@
 package net.NindyBun.jamt.Tools;
 
 import net.NindyBun.jamt.Enums.Modules;
+import net.NindyBun.jamt.Enums.MultiToolClasses;
 import net.NindyBun.jamt.JustAnotherMultiTool;
 import net.NindyBun.jamt.Registries.ModDataComponents;
 import net.NindyBun.jamt.Registries.ModItems;
@@ -26,6 +27,14 @@ public class ToolMethods {
         return inventory;
     }
 
+    public static List<MultiToolInventory.MultiToolInventoryCODEC> init_inventory(MultiToolClasses letter) {
+        List<MultiToolInventory.MultiToolInventoryCODEC> inventory = new ArrayList<>();
+        for (int i = 0; i < 60; i++) {
+            inventory.add(new MultiToolInventory.MultiToolInventoryCODEC("empty", i, letter.default_slots[i], Modules.EMPTY.getItem()));
+        }
+        return inventory;
+    }
+
     public static void set_inventory(ItemStack stack, MultiToolInventory inventory) {
         List<MultiToolInventory.MultiToolInventoryCODEC> data = new ArrayList<>();
         Map<String, Integer> map = new HashMap<>();
@@ -46,7 +55,7 @@ public class ToolMethods {
         }
         stack.set(ModDataComponents.MULTITOOL_INVENTORY.get(), data);
 
-        String selected = stack.getOrDefault(ModDataComponents.SELECTED_MODULE.get(), Modules.EMPTY.getName());
+        String selected = stack.get(ModDataComponents.SELECTED_MODULE.get());
         List<Modules> modules = ToolMethods.get_module_tools(stack);
         if (modules.isEmpty()) {
             stack.set(ModDataComponents.SELECTED_MODULE.get(), Modules.EMPTY.getName());

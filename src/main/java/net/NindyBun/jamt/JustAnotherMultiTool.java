@@ -56,11 +56,11 @@ public class JustAnotherMultiTool
 
         ModSounds.register(modEventBus);
         ModCreativeTabs.register(modEventBus);
-        ModDataComponents.register(modEventBus);
-        ModBlocks.register(modEventBus);
         ModItems.register(modEventBus);
+        ModBlocks.register(modEventBus);
         ModEntities.register(modEventBus);
         ModContainers.register(modEventBus);
+        ModDataComponents.register(modEventBus);
         modEventBus.addListener(Generator::gatherData);
 
         // Register ourselves for server and other game events we are interested in.

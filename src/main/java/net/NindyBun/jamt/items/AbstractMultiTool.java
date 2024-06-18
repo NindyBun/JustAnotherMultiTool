@@ -45,6 +45,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSet;
@@ -73,7 +74,15 @@ public class AbstractMultiTool extends Item {
     private ModSounds.LoopMiningLaserSound loopMiningLaserSound;
 
     public AbstractMultiTool(MultiToolClasses letter) {
-        super(new Item.Properties().stacksTo(1).setNoRepair());
+        super(new Item.Properties().stacksTo(1).setNoRepair()
+                .component(ModDataComponents.COOLDOWN.get(), 0)
+                .component(ModDataComponents.FIRE_RATE.get(), 0)
+                .component(ModDataComponents.DESTROY_PROGRESS.get(), 0f)
+                .component(ModDataComponents.LAST_BLOCKPOS.get(), new BlockPos(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE))
+                .component(ModDataComponents.SELECTED_MODULE.get(), Modules.EMPTY.getName())
+                .component(ModDataComponents.OVERLOADED.get(), false)
+                .component(ModDataComponents.BURST_AMOUNT.get(), 0)
+        );
         this.letter = letter;
     }
 
@@ -162,8 +171,8 @@ public class AbstractMultiTool extends Item {
         IEnergyStorage energy = stack.getCapability(Capabilities.EnergyStorage.ITEM);
         if (energy == null) return InteractionResultHolder.pass(stack);
 
-        String selected = stack.getOrDefault(ModDataComponents.SELECTED_MODULE.get(), Modules.EMPTY.getName());
-        if (ToolMethods.get_module_tools(stack).size() > 4 || stack.getOrDefault(ModDataComponents.OVERLOADED.get(), false) || selected.equals(Modules.EMPTY.getName())) {
+        String selected = stack.get(ModDataComponents.SELECTED_MODULE.get());
+        if (ToolMethods.get_module_tools(stack).size() > 4 || stack.get(ModDataComponents.OVERLOADED.get()) || selected.equals(Modules.EMPTY.getName())) {
             if (world.isClientSide) player.playSound(ModSounds.ERROR.get(), 0.45f, 1f);
             return InteractionResultHolder.fail(stack);
         }
@@ -171,21 +180,9 @@ public class AbstractMultiTool extends Item {
         //energy.receiveEnergy(-Constants.MULTITOOL_BASEPOWER, false);
         if (selected.equals(Modules.MINING_LASER.getName())) {
             if (world.isClientSide) player.playSound(ModSounds.MINING_LASER_START.get(), 1f, 1f);
-            player.startUsingItem(usedHand);
-            return InteractionResultHolder.pass(stack);
-        }
-        if (selected.equals(Modules.BOLT_CASTER.getName())) {
-            if (stack.getOrDefault(ModDataComponents.COOLDOWN.get(), 0) == 0) {
-                if (!world.isClientSide) {
-                    stack.set(ModDataComponents.FIRE_RATE.get(), (int) Modules.BOLT_CASTER.getGroup().get(Modules.Group.FIRE_RATE));
-                    useBoltCaster(world, player, stack);
-                    player.startUsingItem(usedHand);
-                }
-            } else {
-                return InteractionResultHolder.pass(stack);
-            }
         }
 
+        player.startUsingItem(usedHand);
         return InteractionResultHolder.pass(stack);
     }
 
@@ -196,7 +193,7 @@ public class AbstractMultiTool extends Item {
         IEnergyStorage energy = stack.getCapability(Capabilities.EnergyStorage.ITEM);
         if (energy == null) return;
 
-        String selected = stack.getOrDefault(ModDataComponents.SELECTED_MODULE.get(), Modules.EMPTY.getName());
+        String selected = stack.get(ModDataComponents.SELECTED_MODULE.get());
         if (selected.equals(Modules.EMPTY.getName())) return;
 
         //energy.receiveEnergy(-Constants.MULTITOOL_BASEPOWER, false);
@@ -209,10 +206,14 @@ public class AbstractMultiTool extends Item {
             return;
         }
         if (selected.equals(Modules.BOLT_CASTER.getName())) {
-            if (!world.isClientSide) {
-                useBoltCaster(world, player, stack);
+            if (stack.get(ModDataComponents.COOLDOWN.get()) == 0f) {
+                if (!world.isClientSide) {
+                    stack.set(ModDataComponents.BURST_AMOUNT.get(), (int) Modules.BOLT_CASTER.getGroup().get(Modules.Group.BURST_AMOUNT));
+                    stack.set(ModDataComponents.FIRE_RATE.get(), (int) Modules.BOLT_CASTER.getGroup().get(Modules.Group.FIRE_RATE));
+                }
+            } else {
+                return;
             }
-            return;
         }
 
     }
@@ -238,21 +239,21 @@ public class AbstractMultiTool extends Item {
     }
 
     private void useBoltCaster(Level world, Player player, ItemStack stack) {
-        int fireRate = (int) Modules.valueOf(stack.getOrDefault(ModDataComponents.SELECTED_MODULE.get(), Modules.EMPTY.getName()).toUpperCase()).getGroup().get(Modules.Group.FIRE_RATE);
-        int currentTick = Math.min(stack.getOrDefault(ModDataComponents.FIRE_RATE.get(), (int) Modules.BOLT_CASTER.getGroup().get(Modules.Group.FIRE_RATE)) + 1, fireRate);
-        stack.set(ModDataComponents.FIRE_RATE.get(), currentTick);
-        if (currentTick != fireRate) return;
+        int fireRate = (int) Modules.valueOf(stack.get(ModDataComponents.SELECTED_MODULE.get()).toUpperCase()).getGroup().get(Modules.Group.FIRE_RATE);
+        int currentTick = Math.min(stack.get(ModDataComponents.FIRE_RATE.get()), fireRate);
 
-        //Projectile projectile = this.createProjectile(world, player, Items.ARROW.getDefaultInstance());
-        //EntityHitResult hitResult = VectorFunctions.getEntityLookingAt(player, 16);
-        //this.shoot(world, player, 10f, 0, hitResult == null ? null : hitResult.getEntity());
+        if (currentTick != fireRate) {
+            stack.set(ModDataComponents.FIRE_RATE.get(), currentTick + 1);
+            return;
+        }
 
         Projectile projectile = this.createProjectile(world, player, Items.ARROW.getDefaultInstance());
         projectile.shootFromRotation(player, player.getRotationVector().x, player.getRotationVector().y, 0, 3.15f, 0);
         world.addFreshEntity(projectile);
 
         stack.set(ModDataComponents.FIRE_RATE.get(), 0);
-        stack.set(ModDataComponents.COOLDOWN.get(), 20);
+        stack.set(ModDataComponents.BURST_AMOUNT.get(), stack.get(ModDataComponents.BURST_AMOUNT.get()) - 1);
+        stack.set(ModDataComponents.COOLDOWN.get(), 10);
     }
 
     private void useMiningLaser(Level world, Player player, ItemStack stack) {
@@ -264,7 +265,7 @@ public class AbstractMultiTool extends Item {
         }
 
         BlockHitResult hit = VectorFunctions.getLookingAt(player, player.blockInteractionRange());
-        BlockPos lastPos = stack.getOrDefault(ModDataComponents.LAST_BLOCKPOS.get(), new BlockPos(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE));
+        BlockPos lastPos = stack.get(ModDataComponents.LAST_BLOCKPOS.get());
         if (hit.getType() == HitResult.Type.MISS || !lastPos.equals(new BlockPos(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE)) && !lastPos.equals(hit.getBlockPos()) || !ToolMethods.canToolAffect(stack, world, hit.getBlockPos())) {
             stack.set(ModDataComponents.DESTROY_PROGRESS.get(), 0.0F);
             stack.set(ModDataComponents.LAST_BLOCKPOS.get(), new BlockPos(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE));
@@ -281,11 +282,11 @@ public class AbstractMultiTool extends Item {
         float blockDestroySpeed = s/area.size();
         float toolDestroySpeed = Tiers.IRON.getSpeed();
         float finalDestroySpeed = toolDestroySpeed/(blockDestroySpeed*30);
-        float currentDestorySpeed = stack.getOrDefault(ModDataComponents.DESTROY_PROGRESS.get(), 0.0F) + finalDestroySpeed;
-        stack.set(ModDataComponents.DESTROY_PROGRESS.get(), currentDestorySpeed);
+        float currentDestorySpeed = stack.get(ModDataComponents.DESTROY_PROGRESS.get());
 
         int destroyStage = Math.min(currentDestorySpeed > 0.0F ? (int)(currentDestorySpeed * 10.0F) : -1, 9);
         if (destroyStage != 9) {
+            stack.set(ModDataComponents.DESTROY_PROGRESS.get(), currentDestorySpeed + finalDestroySpeed);
             return;
         }
 
@@ -320,17 +321,29 @@ public class AbstractMultiTool extends Item {
             return;
         }
         Player player = (Player)pEntity;
-        if (pStack.getOrDefault(ModDataComponents.COOLDOWN.get(), 0) > 0) {
-            pStack.set(ModDataComponents.COOLDOWN.get(), Math.max(0, pStack.getOrDefault(ModDataComponents.COOLDOWN.get(), 0)-1));
+        String selected = pStack.get(ModDataComponents.SELECTED_MODULE.get());
+        if (pStack.get(ModDataComponents.COOLDOWN.get()) > 0) {
+            pStack.set(ModDataComponents.COOLDOWN.get(), Math.max(0, pStack.get(ModDataComponents.COOLDOWN.get())-1));
         }
 
         if (!ToolMethods.isHoldingTool(player)) {
+            if (selected.equals(Modules.BOLT_CASTER.getName())) {
+                pStack.set(ModDataComponents.BURST_AMOUNT.get(), 0);
+            }
             return;
         }
+
+        if (selected.equals(Modules.BOLT_CASTER.getName())) {
+            if (pStack.get(ModDataComponents.BURST_AMOUNT.get()) > 0) {
+                useBoltCaster(pLevel, player, pStack);
+            }
+        }
+
         if (!ToolMethods.isUsingTool(player)) {
-            pStack.set(ModDataComponents.FIRE_RATE.get(), 0);
-            pStack.set(ModDataComponents.DESTROY_PROGRESS.get(), 0.0F);
-            pStack.set(ModDataComponents.LAST_BLOCKPOS.get(), new BlockPos(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE));
+            if (selected.equals(Modules.MINING_LASER.getName())) {
+                pStack.set(ModDataComponents.DESTROY_PROGRESS.get(), 0.0F);
+                pStack.set(ModDataComponents.LAST_BLOCKPOS.get(), new BlockPos(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE));
+            }
         }
     }
 

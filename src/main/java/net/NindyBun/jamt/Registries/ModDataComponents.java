@@ -42,6 +42,9 @@ public class ModDataComponents {
     public static final Supplier<DataComponentType<Integer>> COOLDOWN = DATA_COMPONENT.register("cooldown",
             () -> DataComponentType.<Integer>builder().persistent(Codec.INT).networkSynchronized(ByteBufCodecs.INT).build());
 
+    public static final Supplier<DataComponentType<Integer>> BURST_AMOUNT = DATA_COMPONENT.register("burst_amount",
+            () -> DataComponentType.<Integer>builder().persistent(Codec.INT).networkSynchronized(ByteBufCodecs.INT).build());
+
     public static final Supplier<DataComponentType<BlockPos>> LAST_BLOCKPOS = DATA_COMPONENT.register("last_blockpos",
             () -> DataComponentType.<BlockPos>builder().persistent(BlockPos.CODEC).networkSynchronized(BlockPos.STREAM_CODEC).build());
 
