@@ -1,28 +1,17 @@
 package net.NindyBun.jamt;
 
-import com.mojang.blaze3d.platform.InputConstants;
 import net.NindyBun.jamt.Network.PacketHandler;
-import net.NindyBun.jamt.Network.packets.ServerOpenMultiToolRadialMenu;
 import net.NindyBun.jamt.Registries.*;
-import net.NindyBun.jamt.Tools.ToolMethods;
 import net.NindyBun.jamt.capabilities.EnergyCapability;
 import net.NindyBun.jamt.data.Generator;
 import net.NindyBun.jamt.entities.ModificationTableEntity;
+import net.NindyBun.jamt.entities.projectiles.BoltCaster.BoltBeamRenderer;
 import net.NindyBun.jamt.items.AbstractMultiTool;
 import net.NindyBun.jamt.screens.ModificationTableScreen;
-import net.minecraft.client.KeyMapping;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.bus.api.Event;
+import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.client.event.*;
-import net.neoforged.neoforge.event.level.BlockEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
-import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
@@ -95,6 +84,11 @@ public class JustAnotherMultiTool
     @EventBusSubscriber(modid = MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     public static class ClientModEvents
     {
+        @SubscribeEvent
+        public static void clientStuff(FMLClientSetupEvent event) {
+            EntityRenderers.register(ModEntities.BOLT_BEAM_ENTITY.get(), BoltBeamRenderer::new);
+        }
+
         @SubscribeEvent
         public static void registerScreens(RegisterMenuScreensEvent event) {
             event.register(ModContainers.MODIFICATION_TABLE_CONTAINER.get(), ModificationTableScreen::new);

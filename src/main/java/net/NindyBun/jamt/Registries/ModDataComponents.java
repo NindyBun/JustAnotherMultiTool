@@ -51,6 +51,9 @@ public class ModDataComponents {
     public static final Supplier<DataComponentType<String>> SELECTED_MODULE = DATA_COMPONENT.register("selected_module",
             () -> DataComponentType.<String>builder().persistent(Codec.STRING).networkSynchronized(ByteBufCodecs.STRING_UTF8).build());
 
+    public static final Supplier<DataComponentType<Boolean>> ACTIVE = DATA_COMPONENT.register("active",
+            () -> DataComponentType.<Boolean>builder().persistent(Codec.BOOL).networkSynchronized(ByteBufCodecs.BOOL).build());
+
     public static void register(IEventBus eventBus) {
         DATA_COMPONENT.register(eventBus);
     }

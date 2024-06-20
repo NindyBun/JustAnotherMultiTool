@@ -30,6 +30,9 @@ public class ModSounds {
     public static final Supplier<SoundEvent> MINING_LASER_END = SOUNDS.register("mining_laser_end",
             () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(JustAnotherMultiTool.MODID, "mining_laser_end")));
 
+    public static final Supplier<SoundEvent> BOLT_BEAM = SOUNDS.register("bolt_beam",
+            () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(JustAnotherMultiTool.MODID, "bolt_beam")));
+
     public static void register(IEventBus event) {
         SOUNDS.register(event);
     }

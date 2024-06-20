@@ -105,8 +105,8 @@ public class ToolMethods {
 
     public static boolean isUsingTool(Player player) {
         if (!ToolMethods.isHoldingTool(player)) return false;
-        if ((player.getItemInHand(player.getUsedItemHand()).getItem() instanceof AbstractMultiTool) && player.isUsingItem()) return true;
-        return false;
+        //if ((player.getItemInHand(player.getUsedItemHand()).getItem() instanceof AbstractMultiTool) && player.isUsingItem()) return true;
+        return ToolMethods.getTool(player).get(ModDataComponents.ACTIVE.get());
     }
 
     public static ItemStack getTool(Player player) {

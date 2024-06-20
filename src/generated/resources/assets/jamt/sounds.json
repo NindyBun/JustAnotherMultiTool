@@ -1,4 +1,10 @@
 {
+  "bolt_beam": {
+    "sounds": [
+      "jamt:bolt_beam"
+    ],
+    "subtitle": "subtitles.jamt.bolt_beam"
+  },
   "mining_laser_end": {
     "sounds": [
       "jamt:mining_laser_end"

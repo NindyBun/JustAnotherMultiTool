@@ -19,9 +19,11 @@ public enum Modules {
     BOLT_CASTER("bolt_caster", ModItems.BOLT_CASTER, "tool", new Group()
             .put(Group.GROUP_NAME, "bolt_caster")
             .put(Group.GROUP_COLOR, Color.ORANGE)
-            .put(Group.BASE_DAMAGE, 2.5f)
+            .put(Group.BASE_DAMAGE, 1.0)
             .put(Group.FIRE_RATE, 1)
-            .put(Group.BURST_AMOUNT, 3)),
+            .put(Group.BURST_AMOUNT, 3)
+            .put(Group.COOLDOWN, 8)
+            .put(Group.SPEED, 3.14f)),
     ;
 
     private final String name;
@@ -66,6 +68,8 @@ public enum Modules {
         public static final String BASE_DAMAGE = "baseDamage";
         public static final String FIRE_RATE = "fireRate";
         public static final String BURST_AMOUNT = "burstAmount";
+        public static final String COOLDOWN = "cooldown";
+        public static final String SPEED = "speed";
 
         public Group() {}
 

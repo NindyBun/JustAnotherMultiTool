@@ -11,6 +11,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.datafix.fixes.OptionsKeyLwjgl3Fix;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.api.distmarker.Dist;
@@ -20,12 +21,13 @@ import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.lwjgl.glfw.GLFW;
+import org.lwjgl.system.windows.MOUSEINPUT;
 
 import java.util.function.Supplier;
 
 @EventBusSubscriber(value = Dist.CLIENT, modid = JustAnotherMultiTool.MODID)
 public class ClientEvents {
-    public static KeyMapping multitool_key;
+    public static KeyMapping multitool_key, itemuse_key;
     private static boolean multitool_keyWasDown = false;
 
     @SubscribeEvent
@@ -82,6 +84,7 @@ public class ClientEvents {
         @SubscribeEvent
         public static void registerKeyBinds(RegisterKeyMappingsEvent event) {
             event.register(multitool_key = new KeyMapping("key."+JustAnotherMultiTool.MODID+".multitool_key", GLFW.GLFW_KEY_V, "key.categories."+JustAnotherMultiTool.MODID));
+            event.register(itemuse_key = new KeyMapping("key."+JustAnotherMultiTool.MODID+".itemuse_key", InputConstants.Type.MOUSE, 1, "key.categories."+JustAnotherMultiTool.MODID));
         }
     }
 

@@ -31,5 +31,9 @@ public class GeneratorSounds extends SoundDefinitionsProvider {
         add(ModSounds.MINING_LASER_END.get(), SoundDefinition.definition()
                 .subtitle("subtitles." + JustAnotherMultiTool.MODID + ".mining_laser_end")
                 .with(sound(new ResourceLocation(JustAnotherMultiTool.MODID, ModSounds.MINING_LASER_END.get().getLocation().getPath()))));
+
+        add(ModSounds.BOLT_BEAM.get(), SoundDefinition.definition()
+                .subtitle("subtitles." + JustAnotherMultiTool.MODID + ".bolt_beam")
+                .with(sound(new ResourceLocation(JustAnotherMultiTool.MODID, ModSounds.BOLT_BEAM.get().getLocation().getPath()))));
     }
 }
