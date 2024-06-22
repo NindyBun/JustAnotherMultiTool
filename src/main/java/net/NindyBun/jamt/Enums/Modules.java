@@ -15,11 +15,13 @@ public enum Modules {
     MINING_LASER("mining_laser", ModItems.MINING_LASER, "tool", new Group()
             .put(Group.GROUP_NAME, "mining_laser")
             .put(Group.GROUP_COLOR, Color.GREEN)
-            .put(Group.BASE_DAMAGE, 2f)),
+            .put(Group.BASE_DAMAGE, 2.0f)
+            .put(Group.MINING_SPEED, 6.0f)
+            .put(Group.RADIUS, 1)),
     BOLT_CASTER("bolt_caster", ModItems.BOLT_CASTER, "tool", new Group()
             .put(Group.GROUP_NAME, "bolt_caster")
             .put(Group.GROUP_COLOR, Color.ORANGE)
-            .put(Group.BASE_DAMAGE, 1.0)
+            .put(Group.BASE_DAMAGE, 2.0f)
             .put(Group.FIRE_RATE, 1)
             .put(Group.BURST_AMOUNT, 3)
             .put(Group.COOLDOWN, 8)
@@ -70,6 +72,8 @@ public enum Modules {
         public static final String BURST_AMOUNT = "burstAmount";
         public static final String COOLDOWN = "cooldown";
         public static final String SPEED = "speed";
+        public static final String MINING_SPEED = "mining_speed";
+        public static final String RADIUS = "radius";
 
         public Group() {}
 

@@ -7,6 +7,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ClipBlockStateContext;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.*;
@@ -17,21 +18,23 @@ import java.util.stream.Collectors;
 public class VectorFunctions {
 
     public static EntityHitResult getEntityLookingAt(Player player, double range) {
+        Level world = player.level();
         Vec3 look = player.getLookAngle();
         Vec3 start = new Vec3(player.getX(), player.getY() + player.getEyeHeight(), player.getZ());
-        Vec3 end = new Vec3(player.getX() + look.x * range, player.getY() + player.getEyeHeight() + look.y * range, player.getZ() + look.z * range);
-        EntityHitResult entityhitresult = ProjectileUtil.getEntityHitResult(
-                player.level(), player, start, end, new AABB(start, end).inflate(1.0), p_156765_ -> !p_156765_.isSpectator(), 0.0F
-        );
-        if (entityhitresult == null || entityhitresult.getType() != HitResult.Type.ENTITY) {
-            return null;
+        EntityHitResult entityhitresult = null;
+
+        for (double i = 0.5; i < range; i+= 0.5) {
+            Vec3 end = new Vec3(player.getX() + look.x * i, player.getY() + player.getEyeHeight() + look.y * i, player.getZ() + look.z * i);
+            EntityHitResult entityhitresult1 = ProjectileUtil.getEntityHitResult(
+                    player.level(), player, start, end, new AABB(start, end).inflate(1.0), p_156765_ -> !p_156765_.isSpectator(), 0.0F
+            );
+            if (entityhitresult1 == null || entityhitresult1.getType() != HitResult.Type.ENTITY || !entityhitresult1.getEntity().isAlive()) continue;
+            BlockHitResult blockHitResult = world.clip(new ClipContext(start, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
+            if (blockHitResult.getType() == HitResult.Type.BLOCK) continue;
+            entityhitresult = entityhitresult1;
+            break;
         }
 
-        Entity entity = entityhitresult.getEntity();
-        BlockHitResult hitResult1 = VectorFunctions.getLookingAt(player, entity.position().distanceTo(start));
-        if (hitResult1.getType() == HitResult.Type.BLOCK) {
-            return null;
-        }
         return entityhitresult;
     }
 

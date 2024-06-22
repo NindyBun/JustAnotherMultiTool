@@ -10,6 +10,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
+import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -35,7 +36,7 @@ import javax.annotation.Nullable;
 import java.util.*;
 
 public class BoltBeamEntity extends Projectile {
-    private double damage = 1;
+    private float damage = 0f;
     private int ticksSinceFired;
     private static final double STOP_TRESHOLD = 0.01;
     private UUID ownerUUID;
@@ -55,10 +56,9 @@ public class BoltBeamEntity extends Projectile {
     public BoltBeamEntity(Level world, LivingEntity livingEntity, @Nullable ResourceLocation texture) {
         super(ModEntities.BOLT_BEAM_ENTITY.get(), world);
         this.setOwner(livingEntity);
-        Player player = (Player)livingEntity;
         this.setPos(livingEntity.getX(), livingEntity.getEyeY()-0.1f, livingEntity.getZ());
         if (texture != null) this.texture = texture;
-        this.damage = (double) Modules.BOLT_CASTER.getGroup().get(Modules.Group.BASE_DAMAGE);
+        this.damage = (float) Modules.BOLT_CASTER.getGroup().get(Modules.Group.BASE_DAMAGE);
     }
 
     @Override
@@ -82,39 +82,21 @@ public class BoltBeamEntity extends Projectile {
             vec33 = hitresult.getLocation();
         }
 
-        while(!this.isRemoved()) {
-            EntityHitResult entityhitresult = this.findHitEntity(vec32, vec33);
-            if (entityhitresult != null) {
-                hitresult = entityhitresult;
-            }
+        EntityHitResult entityhitresult = this.findHitEntity(vec32, vec33);
+        if (entityhitresult != null) {
+            hitresult = entityhitresult;
+        }
 
-            if (hitresult != null && hitresult.getType() == HitResult.Type.ENTITY) {
-                Entity entity = ((EntityHitResult)hitresult).getEntity();
-                Entity entity1 = this.getOwner();
-                if (entity instanceof Player && entity1 instanceof Player && !((Player)entity1).canHarmPlayer((Player)entity)) {
-                    hitresult = null;
-                    entityhitresult = null;
-                }
+        if (hitresult.getType() == HitResult.Type.ENTITY) {
+            Entity entity = ((EntityHitResult)hitresult).getEntity();
+            Entity entity1 = this.getOwner();
+            if (entity instanceof Player && entity1 instanceof Player && !((Player)entity1).canHarmPlayer((Player)entity)) {
+                hitresult = null;
             }
+        }
 
-            if (hitresult != null && hitresult.getType() != HitResult.Type.MISS && !EventHooks.onProjectileImpact(this, hitresult)) {
-                this.onHit(hitresult);
-            }
-
-            if (hitresult != null && hitresult.getType() != HitResult.Type.MISS) {
-                if (net.neoforged.neoforge.event.EventHooks.onProjectileImpact(this, hitresult))
-                    break;
-                ProjectileDeflection projectiledeflection = this.hitTargetOrDeflectSelf(hitresult);
-                if (projectiledeflection != ProjectileDeflection.NONE) {
-                    break;
-                }
-            }
-
-            if (entityhitresult == null ) {
-                break;
-            }
-
-            hitresult = null;
+        if (hitresult != null && hitresult.getType() != HitResult.Type.MISS && !EventHooks.onProjectileImpact(this, hitresult)) {
+            this.onHit(hitresult);
         }
 
         if (this.xRotO == 0.0F && this.yRotO == 0.0F) {
@@ -159,14 +141,14 @@ public class BoltBeamEntity extends Projectile {
 
     @Override
     protected void onHit(HitResult pResult) {
-        super.onHit(pResult);
+        if (!this.level().isClientSide) super.onHit(pResult);
     }
 
     @Override
     protected void onHitEntity(EntityHitResult pResult) {
         Entity entity = pResult.getEntity();
-        int i = Mth.ceil(Mth.clamp(this.damage, 0.0, 2.147483647E9));
 
+        entity.invulnerableTime = 0;
 
         Entity owner = this.getOwner();
         DamageSource damagesource;
@@ -178,29 +160,8 @@ public class BoltBeamEntity extends Projectile {
                 ((LivingEntity)owner).setLastHurtMob(entity);
             }
         }
-
-        boolean flag = entity.getType() == EntityType.ENDERMAN;
-        if (entity.hurt(damagesource, (float)i)) {
-            if (flag) {
-                return;
-            }
-
-            if (entity instanceof LivingEntity) {
-                LivingEntity livingEntity = (LivingEntity) entity;
-                if (!this.level().isClientSide && owner instanceof LivingEntity) {
-                    EnchantmentHelper.doPostHurtEffects(livingEntity, owner);
-                    EnchantmentHelper.doPostDamageEffects((LivingEntity)owner, livingEntity);
-                }
-
-                this.doPostHurtEffects(livingEntity);
-            }
-
-            //this.playSound(this.soundEvent, 1.0F, 1.2F / (this.random.nextFloat() * 0.2F + 0.9F));
-            entity.invulnerableTime = (int) Modules.BOLT_CASTER.getGroup().get(Modules.Group.FIRE_RATE) + 11;
-            this.discard();
-        } else {
-            this.discard();
-        }
+        entity.hurt(damagesource, this.damage);
+        this.discard();
     }
 
     @Override
@@ -208,7 +169,7 @@ public class BoltBeamEntity extends Projectile {
         BlockPos blockPos = pResult.getBlockPos();
         BlockState blockState = this.level().getBlockState(blockPos);
         SoundType soundType = blockState.getSoundType(this.level(), blockPos, null);
-        this.playSound(soundType.getBreakSound(), 0.5F, random.nextFloat() * 0.1F + 0.9F);
+        this.playSound(soundType.getHitSound(), 0.3F, random.nextFloat() * 0.1F + 0.9F);
         this.discard();
     }
 
@@ -270,7 +231,7 @@ public class BoltBeamEntity extends Projectile {
         Entity entity = this.getOwner();
         if (entity != null) {
             for(Entity entity1 : this.level().getEntities(this, this.getBoundingBox().expandTowards(this.getDeltaMovement()).inflate(1.0D), (p_234613_0_) -> {
-                return !p_234613_0_.isSpectator() && p_234613_0_.isPickable();
+                return !p_234613_0_.isSpectator();
             })) {
                 if (entity1.getRootVehicle() == entity.getRootVehicle()) {
                     return false;
@@ -293,13 +254,13 @@ public class BoltBeamEntity extends Projectile {
     protected void addAdditionalSaveData(CompoundTag pCompound) {
         super.addAdditionalSaveData(pCompound);
         pCompound.putInt("ticksSinceFired", this.ticksSinceFired);
-        pCompound.putDouble("damage", this.damage);
+        pCompound.putFloat("damage", this.damage);
     }
 
     @Override
     protected void readAdditionalSaveData(CompoundTag pCompound) {
         super.readAdditionalSaveData(pCompound);
         this.ticksSinceFired = pCompound.getInt("ticksSinceFired");
-        this.damage = pCompound.getDouble("damage");
+        this.damage = pCompound.getFloat("damage");
     }
 }

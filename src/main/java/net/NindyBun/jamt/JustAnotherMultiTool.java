@@ -2,6 +2,7 @@ package net.NindyBun.jamt;
 
 import net.NindyBun.jamt.Network.PacketHandler;
 import net.NindyBun.jamt.Registries.*;
+import net.NindyBun.jamt.Tools.ToolMethods;
 import net.NindyBun.jamt.capabilities.EnergyCapability;
 import net.NindyBun.jamt.data.Generator;
 import net.NindyBun.jamt.entities.ModificationTableEntity;
@@ -9,9 +10,15 @@ import net.NindyBun.jamt.entities.projectiles.BoltCaster.BoltBeamRenderer;
 import net.NindyBun.jamt.items.AbstractMultiTool;
 import net.NindyBun.jamt.screens.ModificationTableScreen;
 import net.minecraft.client.renderer.entity.EntityRenderers;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.*;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.client.event.*;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
@@ -68,6 +75,28 @@ public class JustAnotherMultiTool
                 (level, pos, state, blockEntity, context) -> ((ModificationTableEntity) blockEntity).handler,
                 ModBlocks.MODIFICATION_TABLE.get()
                 );
+    }
+
+    @SubscribeEvent
+    public void rightClickEvent(PlayerInteractEvent.RightClickBlock event) {
+        ItemStack stack = ToolMethods.getTool(event.getEntity());
+        if (stack.getItem() instanceof AbstractMultiTool) {
+            if (this.stackIsAnnoying(event.getLevel(), event.getEntity().getMainHandItem())
+                    || this.stackIsAnnoying(event.getLevel(), event.getEntity().getOffhandItem())
+                    || event.getLevel().getBlockState(event.getPos()).getBlock() instanceof RedStoneOreBlock) {
+                event.setCanceled(true);
+            }
+        }
+    }
+
+    private boolean stackIsAnnoying(Level level, ItemStack stack) {
+        if (!(stack.getItem() instanceof BlockItem))
+            return false;
+
+        Block block = ((BlockItem) stack.getItem()).getBlock();
+        return block.defaultBlockState().getLightEmission(level, BlockPos.ZERO) > 0;
+        /*return block instanceof TorchBlock || block instanceof LanternBlock || block.equals(Blocks.GLOWSTONE)
+                || block instanceof RedstoneLampBlock || block instanceof EndRodBlock;*/
     }
 
     private void commonSetup(final FMLCommonSetupEvent event)

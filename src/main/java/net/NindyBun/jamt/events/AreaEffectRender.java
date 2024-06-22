@@ -60,7 +60,7 @@ public class AreaEffectRender {
             return;
         }
         BlockPos target = hit.getBlockPos();
-        ImmutableList<BlockPos> area = player.isCrouching() ? ImmutableList.of(target) : VectorFunctions.getBreakableArea(stack, target, player, 1);
+        ImmutableList<BlockPos> area = player.isCrouching() ? ImmutableList.of(target) : VectorFunctions.getBreakableArea(stack, target, player, (int) Modules.MINING_LASER.getGroup().get(Modules.Group.RADIUS));
 
         PoseStack poseStack = event.getPoseStack();
         VertexConsumer vertexBuilder = Minecraft.getInstance().renderBuffers().bufferSource().getBuffer(RenderType.LINES);

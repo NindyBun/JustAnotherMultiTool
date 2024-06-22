@@ -84,7 +84,7 @@ public class ClientEvents {
         @SubscribeEvent
         public static void registerKeyBinds(RegisterKeyMappingsEvent event) {
             event.register(multitool_key = new KeyMapping("key."+JustAnotherMultiTool.MODID+".multitool_key", GLFW.GLFW_KEY_V, "key.categories."+JustAnotherMultiTool.MODID));
-            event.register(itemuse_key = new KeyMapping("key."+JustAnotherMultiTool.MODID+".itemuse_key", InputConstants.Type.MOUSE, 1, "key.categories."+JustAnotherMultiTool.MODID));
+            event.register(itemuse_key = new KeyMapping("key."+JustAnotherMultiTool.MODID+".itemuse_key", InputConstants.Type.MOUSE, 0, "key.categories."+JustAnotherMultiTool.MODID));
         }
     }
 

@@ -7,6 +7,7 @@ import net.NindyBun.jamt.Registries.ModDataComponents;
 import net.NindyBun.jamt.Registries.ModItems;
 import net.NindyBun.jamt.containers.MultiToolInventory;
 import net.NindyBun.jamt.containers.MultiToolSlot;
+import net.NindyBun.jamt.events.ClientEvents;
 import net.NindyBun.jamt.items.AbstractMultiTool;
 import net.NindyBun.jamt.screens.ModificationTableScreen;
 import net.minecraft.core.BlockPos;
@@ -95,7 +96,7 @@ public class ToolMethods {
             return false;
         }
 
-        return toolItem.isCorrectToolForDrops(toolStack, state) || !state.requiresCorrectToolForDrops() && toolItem.getDestroySpeed(toolStack, state) > 1.0F;
+        return toolItem.isCorrectToolForDrops(toolStack, state);
     }
 
     public static boolean isHoldingTool(Player player) {
@@ -106,7 +107,7 @@ public class ToolMethods {
     public static boolean isUsingTool(Player player) {
         if (!ToolMethods.isHoldingTool(player)) return false;
         //if ((player.getItemInHand(player.getUsedItemHand()).getItem() instanceof AbstractMultiTool) && player.isUsingItem()) return true;
-        return ToolMethods.getTool(player).get(ModDataComponents.ACTIVE.get());
+        return ToolMethods.getTool(player).get(ModDataComponents.ACTIVE.get()) && ClientEvents.itemuse_key.isDown();
     }
 
     public static ItemStack getTool(Player player) {

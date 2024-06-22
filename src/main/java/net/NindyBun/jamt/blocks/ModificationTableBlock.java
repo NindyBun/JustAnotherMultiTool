@@ -36,7 +36,7 @@ public class ModificationTableBlock extends Block implements EntityBlock{
 
     public ModificationTableBlock() {
         super(BlockBehaviour.Properties.of()
-                .strength(2.0F)
+                .strength(2.0f)
         );
         this.registerDefaultState(this.getStateDefinition().any().setValue(FACING, Direction.NORTH));
     }
