@@ -17,15 +17,27 @@ public enum Modules {
             .put(Group.GROUP_COLOR, Color.GREEN)
             .put(Group.BASE_DAMAGE, 2.0f)
             .put(Group.MINING_SPEED, 6.0f)
-            .put(Group.RADIUS, 1)),
+            .put(Group.RADIUS, 0)
+    ),
     BOLT_CASTER("bolt_caster", ModItems.BOLT_CASTER, "tool", new Group()
             .put(Group.GROUP_NAME, "bolt_caster")
             .put(Group.GROUP_COLOR, Color.ORANGE)
             .put(Group.BASE_DAMAGE, 2.0f)
-            .put(Group.FIRE_RATE, 1)
+            .put(Group.FIRE_RATE, 2)
             .put(Group.BURST_AMOUNT, 3)
-            .put(Group.COOLDOWN, 8)
-            .put(Group.SPEED, 3.14f)),
+            .put(Group.COOLDOWN, 12)
+            .put(Group.SPEED, Math.PI)
+            .put(Group.INACCURACY, 1.0f)
+    ),
+    PLASMA_SPITTER("plasma_spitter", ModItems.PLASMA_SPITTER, "tool", new Group()
+            .put(Group.GROUP_NAME, "plasma_spitter")
+            .put(Group.GROUP_COLOR, Color.YELLOW)
+            .put(Group.BASE_DAMAGE, 2.5f)
+            .put(Group.FIRE_RATE, 2)
+            .put(Group.COOLDOWN, 5)
+            .put(Group.SPEED, 2*Math.PI/3)
+            .put(Group.INACCURACY, 1.8f)
+    ),
     ;
 
     private final String name;
@@ -74,6 +86,7 @@ public enum Modules {
         public static final String SPEED = "speed";
         public static final String MINING_SPEED = "mining_speed";
         public static final String RADIUS = "radius";
+        public static final String INACCURACY = "inaccuracy";
 
         public Group() {}
 

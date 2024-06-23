@@ -35,5 +35,9 @@ public class GeneratorSounds extends SoundDefinitionsProvider {
         add(ModSounds.BOLT_BEAM.get(), SoundDefinition.definition()
                 .subtitle("subtitles." + JustAnotherMultiTool.MODID + ".bolt_beam")
                 .with(sound(new ResourceLocation(JustAnotherMultiTool.MODID, ModSounds.BOLT_BEAM.get().getLocation().getPath()))));
+
+        add(ModSounds.PLASMA_SPITTER.get(), SoundDefinition.definition()
+                .subtitle("subtitles." + JustAnotherMultiTool.MODID + ".plasma_spitter")
+                .with(sound(new ResourceLocation(JustAnotherMultiTool.MODID, ModSounds.PLASMA_SPITTER.get().getLocation().getPath()))));
     }
 }

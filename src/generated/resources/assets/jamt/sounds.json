@@ -23,6 +23,12 @@
     ],
     "subtitle": "subtitles.jamt.mining_laser_start"
   },
+  "plasma_spitter": {
+    "sounds": [
+      "jamt:plasma_spitter"
+    ],
+    "subtitle": "subtitles.jamt.plasma_spitter"
+  },
   "tool_error": {
     "sounds": [
       "jamt:tool_error"

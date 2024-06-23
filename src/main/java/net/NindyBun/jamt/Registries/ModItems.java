@@ -26,6 +26,7 @@ public class ModItems {
     public static final Supplier<Item> EMPTY = MODULES.register("empty", () -> new ModuleCard(Modules.EMPTY));
     public static final Supplier<Item> MINING_LASER = MODULES.register("mining_laser", () -> new ModuleCard(Modules.MINING_LASER));
     public static final Supplier<Item> BOLT_CASTER = MODULES.register("bolt_caster", () -> new ModuleCard(Modules.BOLT_CASTER));
+    public static final Supplier<Item> PLASMA_SPITTER = MODULES.register("plasma_spitter", () -> new ModuleCard(Modules.PLASMA_SPITTER));
 
     public static void register(IEventBus eventBus) {
         ITEMS.register(eventBus);

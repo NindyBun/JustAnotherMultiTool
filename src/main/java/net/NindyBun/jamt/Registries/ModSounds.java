@@ -33,6 +33,9 @@ public class ModSounds {
     public static final Supplier<SoundEvent> BOLT_BEAM = SOUNDS.register("bolt_beam",
             () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(JustAnotherMultiTool.MODID, "bolt_beam")));
 
+    public static final Supplier<SoundEvent> PLASMA_SPITTER = SOUNDS.register("plasma_spitter",
+            () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(JustAnotherMultiTool.MODID, "plasma_spitter")));
+
     public static void register(IEventBus event) {
         SOUNDS.register(event);
     }

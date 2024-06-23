@@ -23,7 +23,8 @@ public class GeneratorLang extends LanguageProvider {
         add("subtitles." + JustAnotherMultiTool.MODID + ".mining_laser_start", "Mining Laser Started");
         add("subtitles." + JustAnotherMultiTool.MODID + ".mining_laser_loop", "Mining Laser Looping");
         add("subtitles." + JustAnotherMultiTool.MODID + ".mining_laser_end", "Mining Laser Ended");
-        add("subtitles." + JustAnotherMultiTool.MODID + ".bolt_beam", "Pew.");
+        add("subtitles." + JustAnotherMultiTool.MODID + ".bolt_beam", "Bolt Beam shot");
+        add("subtitles." + JustAnotherMultiTool.MODID + ".plasma_spitter", "Plasma Spitter shot");
 
         add(ModItems.EMPTY.get(), "");
         add(ModItems.SLOT_UNLOCKER.get(), "Slot Unlocker");
@@ -31,6 +32,7 @@ public class GeneratorLang extends LanguageProvider {
         add(ModItems.C_MULTITOOL.get(), "Class C Multi-Tool");
         add(ModItems.MINING_LASER.get(), "Tool: Mining Laser");
         add(ModItems.BOLT_CASTER.get(), "Tool: Bolt Caster");
+        add(ModItems.PLASMA_SPITTER.get(), "Tool: Plasma Spitter");
 
 
         add(ModBlocks.MODIFICATION_TABLE.get(), "Modification Table");

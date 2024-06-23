@@ -280,16 +280,16 @@ public class AbstractMultiTool extends Item {
 
     private void shootProjectile(Level world, Player player) {
         BoltBeamEntity projectile = this.createProjectile(world, player);
-        projectile.shootFromRotation(player, player.getRotationVector().x, player.getRotationVector().y, 0, (float) Modules.BOLT_CASTER.getGroup().get(Modules.Group.SPEED), 1f);
+        projectile.shootFromRotation(player, player.getRotationVector().x, player.getRotationVector().y, 0, (float) Modules.BOLT_CASTER.getGroup().get(Modules.Group.SPEED), (float) Modules.BOLT_CASTER.getGroup().get(Modules.Group.INACCURACY));
         world.addFreshEntity(projectile);
     }
 
     private void useBoltCaster(Level world, Player player, ItemStack stack) {
         int fireRate = (int) Modules.BOLT_CASTER.getGroup().get(Modules.Group.FIRE_RATE);
-        int currentTick = Math.min(stack.get(ModDataComponents.FIRE_RATE.get()), fireRate);
+        int currentTick = Math.min(stack.get(ModDataComponents.FIRE_RATE.get()) + 1, fireRate);
 
         if (currentTick != fireRate) {
-            stack.set(ModDataComponents.FIRE_RATE.get(), currentTick + 1);
+            stack.set(ModDataComponents.FIRE_RATE.get(), currentTick);
             return;
         }
 
