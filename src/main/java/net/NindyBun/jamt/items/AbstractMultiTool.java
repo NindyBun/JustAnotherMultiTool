@@ -7,10 +7,10 @@ import net.NindyBun.jamt.JustAnotherMultiTool;
 import net.NindyBun.jamt.Registries.ModDataComponents;
 import net.NindyBun.jamt.Registries.ModSounds;
 import net.NindyBun.jamt.Tools.*;
-import net.NindyBun.jamt.entities.projectiles.BoltCaster.BoltBeamEntity;
-import net.NindyBun.jamt.events.ClientEvents;
+import net.NindyBun.jamt.entities.projectiles.BoltCaster.BoltCasterEntity;
+import net.NindyBun.jamt.entities.projectiles.PlasmaSpitter.PlasmaSpitterEntity;
+import net.NindyBun.jamt.entities.projectiles.PlasmaSpitter.PlasmaSpitterRenderer;
 import net.minecraft.ChatFormatting;
-import net.minecraft.advancements.critereon.DamageSourcePredicate;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
@@ -21,22 +21,16 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
-import net.minecraft.world.damagesource.DamageEffects;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
-import net.minecraft.world.level.ClipBlockStateContext;
-import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.*;
-import net.minecraft.world.phys.shapes.CollisionContext;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.capabilities.Capabilities;
@@ -261,6 +255,16 @@ public class AbstractMultiTool extends Item {
                     useBoltCaster(pLevel, player, pStack);
                 }
                 break;
+            case Modules.PLASMA_SPITTER:
+                if (pStack.get(ModDataComponents.COOLDOWN.get()) == 0f && isActive) {
+                    if (!pLevel.isClientSide) {
+                        pStack.set(ModDataComponents.FIRE_RATE.get(), (int) Modules.PLASMA_SPITTER.getGroup().get(Modules.Group.FIRE_RATE));
+                    }
+                }
+                if (isActive) {
+                    usePlasmaSpitter(pLevel, player, pStack);
+                }
+                break;
             default:
 
         }
@@ -274,14 +278,24 @@ public class AbstractMultiTool extends Item {
         }
     }
 
-    private BoltBeamEntity createProjectile(Level pLevel, LivingEntity pShooter) {
-            return new BoltBeamEntity(pLevel, pShooter, null);
-    }
+    private void usePlasmaSpitter(Level world, Player player, ItemStack stack) {
+        int fireRate = (int) Modules.PLASMA_SPITTER.getGroup().get(Modules.Group.FIRE_RATE);
+        int currentTick = Math.min(stack.get(ModDataComponents.FIRE_RATE.get()) + 1, fireRate);
 
-    private void shootProjectile(Level world, Player player) {
-        BoltBeamEntity projectile = this.createProjectile(world, player);
-        projectile.shootFromRotation(player, player.getRotationVector().x, player.getRotationVector().y, 0, (float) Modules.BOLT_CASTER.getGroup().get(Modules.Group.SPEED), (float) Modules.BOLT_CASTER.getGroup().get(Modules.Group.INACCURACY));
-        world.addFreshEntity(projectile);
+        if (currentTick != fireRate) {
+            stack.set(ModDataComponents.FIRE_RATE.get(), currentTick);
+            return;
+        }
+
+        if (!world.isClientSide) {
+            PlasmaSpitterEntity projectile = new PlasmaSpitterEntity(world, player);
+            projectile.shootFromRotation(player, player.getRotationVector().x, player.getRotationVector().y, 0, (float) Modules.PLASMA_SPITTER.getGroup().get(Modules.Group.SPEED), (float) Modules.PLASMA_SPITTER.getGroup().get(Modules.Group.INACCURACY));
+            world.addFreshEntity(projectile);
+        }
+
+        if (world.isClientSide) player.playSound(ModSounds.PLASMA_SPITTER.get(), 0.5f, 1f);
+        stack.set(ModDataComponents.FIRE_RATE.get(), 0);
+        stack.set(ModDataComponents.COOLDOWN.get(), (int) Modules.BOLT_CASTER.getGroup().get(Modules.Group.COOLDOWN));
     }
 
     private void useBoltCaster(Level world, Player player, ItemStack stack) {
@@ -293,8 +307,13 @@ public class AbstractMultiTool extends Item {
             return;
         }
 
-        if (!world.isClientSide) this.shootProjectile(world, player);
-        if (world.isClientSide) player.playSound(ModSounds.BOLT_BEAM.get(), 0.5f, 1f);
+        if (!world.isClientSide) {
+            BoltCasterEntity projectile = new BoltCasterEntity(world, player, null);
+            projectile.shootFromRotation(player, player.getRotationVector().x, player.getRotationVector().y, 0, (float) Modules.BOLT_CASTER.getGroup().get(Modules.Group.SPEED), (float) Modules.BOLT_CASTER.getGroup().get(Modules.Group.INACCURACY));
+            world.addFreshEntity(projectile);
+        }
+
+        if (world.isClientSide) player.playSound(ModSounds.BOLT_CASTER.get(), 0.5f, 1f);
         stack.set(ModDataComponents.FIRE_RATE.get(), 0);
         stack.set(ModDataComponents.BURST_AMOUNT.get(), stack.get(ModDataComponents.BURST_AMOUNT.get()) - 1);
         stack.set(ModDataComponents.COOLDOWN.get(), (int) Modules.BOLT_CASTER.getGroup().get(Modules.Group.COOLDOWN));

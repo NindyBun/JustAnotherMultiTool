@@ -6,7 +6,8 @@ import net.NindyBun.jamt.Tools.ToolMethods;
 import net.NindyBun.jamt.capabilities.EnergyCapability;
 import net.NindyBun.jamt.data.Generator;
 import net.NindyBun.jamt.entities.ModificationTableEntity;
-import net.NindyBun.jamt.entities.projectiles.BoltCaster.BoltBeamRenderer;
+import net.NindyBun.jamt.entities.projectiles.BoltCaster.BoltCasterRenderer;
+import net.NindyBun.jamt.entities.projectiles.PlasmaSpitter.PlasmaSpitterRenderer;
 import net.NindyBun.jamt.items.AbstractMultiTool;
 import net.NindyBun.jamt.screens.ModificationTableScreen;
 import net.minecraft.client.renderer.entity.EntityRenderers;
@@ -115,7 +116,8 @@ public class JustAnotherMultiTool
     {
         @SubscribeEvent
         public static void clientStuff(FMLClientSetupEvent event) {
-            EntityRenderers.register(ModEntities.BOLT_BEAM_ENTITY.get(), BoltBeamRenderer::new);
+            EntityRenderers.register(ModEntities.BOLT_CASTER_ENTITY.get(), BoltCasterRenderer::new);
+            EntityRenderers.register(ModEntities.PLASMA_SPITTER_ENTITY.get(), PlasmaSpitterRenderer::new);
         }
 
         @SubscribeEvent

@@ -1,9 +1,5 @@
 package net.NindyBun.jamt.entities.projectiles;
 
-import net.NindyBun.jamt.Enums.Modules;
-import net.NindyBun.jamt.JustAnotherMultiTool;
-import net.NindyBun.jamt.Registries.ModEntities;
-import net.NindyBun.jamt.entities.projectiles.BoltCaster.BoltBeamEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -11,7 +7,6 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
@@ -41,6 +36,7 @@ public class BasicProjectile extends Projectile {
     protected UUID ownerUUID;
     protected int ownerNetworkId;
     protected boolean leftOwner;
+    protected boolean ignoreInvulnerablility = false;
 
     public BasicProjectile(EntityType<? extends Projectile> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
@@ -133,7 +129,7 @@ public class BasicProjectile extends Projectile {
     protected void onHitEntity(EntityHitResult pResult) {
         Entity entity = pResult.getEntity();
 
-        entity.invulnerableTime = 0;
+        if (this.ignoreInvulnerablility) entity.invulnerableTime = 0;
 
         Entity owner = this.getOwner();
         DamageSource damagesource;
@@ -163,7 +159,7 @@ public class BasicProjectile extends Projectile {
 
     @Override
     protected double getDefaultGravity() {
-        return 0.01;
+        return 0.00;
     }
 
 

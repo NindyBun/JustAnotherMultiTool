@@ -1,9 +1,9 @@
 {
-  "bolt_beam": {
+  "bolt_caster": {
     "sounds": [
-      "jamt:bolt_beam"
+      "jamt:bolt_caster"
     ],
-    "subtitle": "subtitles.jamt.bolt_beam"
+    "subtitle": "subtitles.jamt.bolt_caster"
   },
   "mining_laser_end": {
     "sounds": [

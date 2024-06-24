@@ -3,7 +3,6 @@ package net.NindyBun.jamt.entities.projectiles.BoltCaster;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
-import net.NindyBun.jamt.JustAnotherMultiTool;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderer;
@@ -12,13 +11,13 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 
-public class BoltBeamRenderer extends EntityRenderer<BoltBeamEntity> {
-    public BoltBeamRenderer(EntityRendererProvider.Context pContext) {
+public class BoltCasterRenderer extends EntityRenderer<BoltCasterEntity> {
+    public BoltCasterRenderer(EntityRendererProvider.Context pContext) {
         super(pContext);
     }
 
     @Override
-    public void render(BoltBeamEntity pEntity, float pEntityYaw, float pPartialTick, PoseStack pPoseStack, MultiBufferSource pBuffer, int pPackedLight) {
+    public void render(BoltCasterEntity pEntity, float pEntityYaw, float pPartialTick, PoseStack pPoseStack, MultiBufferSource pBuffer, int pPackedLight) {
         pPoseStack.pushPose();
         pPoseStack.mulPose(Axis.YP.rotationDegrees(Mth.lerp(pPartialTick, pEntity.yRotO, pEntity.getYRot()) - 90.0F));
         pPoseStack.mulPose(Axis.ZP.rotationDegrees(Mth.lerp(pPartialTick, pEntity.xRotO, pEntity.getXRot())));
@@ -65,7 +64,7 @@ public class BoltBeamRenderer extends EntityRenderer<BoltBeamEntity> {
     }
 
     @Override
-    public ResourceLocation getTextureLocation(BoltBeamEntity pEntity) {
+    public ResourceLocation getTextureLocation(BoltCasterEntity pEntity) {
         return pEntity.getTexture();
     }
 

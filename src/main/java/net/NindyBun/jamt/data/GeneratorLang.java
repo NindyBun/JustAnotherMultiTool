@@ -23,7 +23,7 @@ public class GeneratorLang extends LanguageProvider {
         add("subtitles." + JustAnotherMultiTool.MODID + ".mining_laser_start", "Mining Laser Started");
         add("subtitles." + JustAnotherMultiTool.MODID + ".mining_laser_loop", "Mining Laser Looping");
         add("subtitles." + JustAnotherMultiTool.MODID + ".mining_laser_end", "Mining Laser Ended");
-        add("subtitles." + JustAnotherMultiTool.MODID + ".bolt_beam", "Bolt Beam shot");
+        add("subtitles." + JustAnotherMultiTool.MODID + ".bolt_caster", "Bolt Caster shot");
         add("subtitles." + JustAnotherMultiTool.MODID + ".plasma_spitter", "Plasma Spitter shot");
 
         add(ModItems.EMPTY.get(), "");

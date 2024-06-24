@@ -26,17 +26,17 @@ public enum Modules {
             .put(Group.FIRE_RATE, 2)
             .put(Group.BURST_AMOUNT, 3)
             .put(Group.COOLDOWN, 12)
-            .put(Group.SPEED, Math.PI)
+            .put(Group.SPEED, 3.14f)
             .put(Group.INACCURACY, 1.0f)
     ),
     PLASMA_SPITTER("plasma_spitter", ModItems.PLASMA_SPITTER, "tool", new Group()
             .put(Group.GROUP_NAME, "plasma_spitter")
             .put(Group.GROUP_COLOR, Color.YELLOW)
-            .put(Group.BASE_DAMAGE, 2.5f)
-            .put(Group.FIRE_RATE, 2)
+            .put(Group.BASE_DAMAGE, 2.0f)
+            .put(Group.FIRE_RATE, 4)
             .put(Group.COOLDOWN, 5)
-            .put(Group.SPEED, 2*Math.PI/3)
-            .put(Group.INACCURACY, 1.8f)
+            .put(Group.SPEED,  1f*3.14f/3f)
+            .put(Group.INACCURACY, 2f)
     ),
     ;
 
