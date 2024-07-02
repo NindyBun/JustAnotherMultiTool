@@ -8,10 +8,14 @@ import net.NindyBun.jamt.data.Generator;
 import net.NindyBun.jamt.entities.ModificationTableEntity;
 import net.NindyBun.jamt.entities.projectiles.BoltCaster.BoltCasterRenderer;
 import net.NindyBun.jamt.entities.projectiles.PlasmaSpitter.PlasmaSpitterRenderer;
+import net.NindyBun.jamt.events.MultiToolUI;
 import net.NindyBun.jamt.items.AbstractMultiTool;
 import net.NindyBun.jamt.screens.ModificationTableScreen;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.LayeredDraw;
 import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -19,6 +23,7 @@ import net.minecraft.world.level.block.*;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.client.event.*;
+import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import org.slf4j.Logger;
 
@@ -118,6 +123,11 @@ public class JustAnotherMultiTool
         public static void clientStuff(FMLClientSetupEvent event) {
             EntityRenderers.register(ModEntities.BOLT_CASTER_ENTITY.get(), BoltCasterRenderer::new);
             EntityRenderers.register(ModEntities.PLASMA_SPITTER_ENTITY.get(), PlasmaSpitterRenderer::new);
+        }
+
+        @SubscribeEvent
+        public static void registerOverlays(RegisterGuiLayersEvent event) {
+            event.registerAbove(VanillaGuiLayers.CROSSHAIR, new ResourceLocation(JustAnotherMultiTool.MODID, "multitool_guilayer"), MultiToolUI::render);
         }
 
         @SubscribeEvent

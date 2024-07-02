@@ -5,6 +5,7 @@ import net.NindyBun.jamt.Enums.Modules;
 import net.NindyBun.jamt.Enums.MultiToolClasses;
 import net.NindyBun.jamt.JustAnotherMultiTool;
 import net.NindyBun.jamt.Registries.ModDataComponents;
+import net.NindyBun.jamt.Registries.ModEntities;
 import net.NindyBun.jamt.Registries.ModSounds;
 import net.NindyBun.jamt.Tools.*;
 import net.NindyBun.jamt.entities.projectiles.BoltCaster.BoltCasterEntity;
@@ -20,12 +21,16 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.loot.LootParams;
@@ -52,6 +57,12 @@ public class AbstractMultiTool extends Item {
                 .component(ModDataComponents.OVERLOADED.get(), false)
                 .component(ModDataComponents.BURST_AMOUNT.get(), 0)
                 .component(ModDataComponents.ACTIVE.get(), false)
+                .component(ModDataComponents.HEAT.get(), 0)
+                .component(ModDataComponents.HEAT_MAX.get(), Constants.MULTITOOL_BASEMAXHEAT)
+                .component(ModDataComponents.BOLT_CASTER_MAG.get(), (int) Modules.BOLT_CASTER.getGroup().get(Modules.Group.MAG_SIZE))
+                .component(ModDataComponents.BOLT_CASTER_MAG_MAX.get(), (int) Modules.BOLT_CASTER.getGroup().get(Modules.Group.MAG_SIZE))
+                .component(ModDataComponents.PLASMA_SPITTER_MAG.get(), (int) Modules.PLASMA_SPITTER.getGroup().get(Modules.Group.MAG_SIZE))
+                .component(ModDataComponents.PLASMA_SPITTER_MAG_MAX.get(), (int) Modules.PLASMA_SPITTER.getGroup().get(Modules.Group.MAG_SIZE))
         );
         this.letter = letter;
     }
@@ -128,7 +139,7 @@ public class AbstractMultiTool extends Item {
     }
 
     @OnlyIn(Dist.CLIENT)
-    public void loopSound(Player player, ItemStack stack) {
+    public void loopSound(Player player) {
         if (loopMiningLaserSound == null) {
             loopMiningLaserSound = new ModSounds.LoopMiningLaserSound(player, 0.6f, player.level().random);
             Minecraft.getInstance().getSoundManager().play(loopMiningLaserSound);
@@ -146,6 +157,10 @@ public class AbstractMultiTool extends Item {
         String selected = stack.get(ModDataComponents.SELECTED_MODULE.get());
         if (ToolMethods.get_module_tools(stack).size() > 4 || stack.get(ModDataComponents.OVERLOADED.get()) || selected.equals(Modules.EMPTY.getName())) {
             if (world.isClientSide) player.playSound(ModSounds.ERROR.get(), 0.40f, 1f);
+            return InteractionResultHolder.fail(stack);
+        }
+
+        if (player.getCooldowns().isOnCooldown(this)) {
             return InteractionResultHolder.fail(stack);
         }
 
@@ -220,21 +235,41 @@ public class AbstractMultiTool extends Item {
             pStack.set(ModDataComponents.COOLDOWN.get(), Math.max(0, pStack.get(ModDataComponents.COOLDOWN.get())-1));
         }
 
+        if (pStack.get(ModDataComponents.HEAT.get()) > 0) {
+            pStack.set(ModDataComponents.HEAT.get(), Math.max(0, pStack.get(ModDataComponents.HEAT.get()) - (player.getCooldowns().isOnCooldown(this) ? (pStack.get(ModDataComponents.HEAT_MAX.get()) / (5 * 20)) : Constants.MULTITOOL_BASEHEATCOOLDOWN)));
+        }
+
         if (!ToolMethods.isHoldingTool(player)) {
             if (selected.equals(Modules.BOLT_CASTER.getName())) {
                 pStack.set(ModDataComponents.BURST_AMOUNT.get(), 0);
             }
+        }
+
+        if (!ToolMethods.isUsingTool(player)) {
+            pStack.set(ModDataComponents.ACTIVE.get(), false);
+            if (selected.equals(Modules.MINING_LASER.getName())) {
+                pStack.set(ModDataComponents.DESTROY_PROGRESS.get(), 0.0F);
+                pStack.set(ModDataComponents.LAST_BLOCKPOS.get(), new BlockPos(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE));
+            }
+        }
+
+        if (player.getCooldowns().isOnCooldown(this)) {
+            pStack.set(ModDataComponents.ACTIVE.get(), false);
             return;
         }
 
         switch (Modules.valueOf(selected.toUpperCase())) {
             case Modules.MINING_LASER:
                 if (pLevel.isClientSide && isActive) {
-                    this.loopSound(player, pStack);
+                    this.loopSound(player);
                 }
-                if (!pLevel.isClientSide && isActive)
+                if (!pLevel.isClientSide && isActive) {
                     useMiningLaser(pLevel, player, pStack);
-
+                    if (pStack.get(ModDataComponents.HEAT.get()) >= pStack.get(ModDataComponents.HEAT_MAX.get())) {
+                        player.getCooldowns().addCooldown(this, 5*20);
+                        return;
+                    }
+                }
                 if (pLevel.isClientSide) {
                     if (this.loopMiningLaserSound != null && !isActive) {
                         if (!this.loopMiningLaserSound.isStopped()) {
@@ -245,11 +280,13 @@ public class AbstractMultiTool extends Item {
                 }
                 break;
             case Modules.BOLT_CASTER:
+                if (pStack.get(ModDataComponents.WAS_RELOADING.get())) {
+                    pStack.set(ModDataComponents.WAS_RELOADING.get(), false);
+                    pStack.set(ModDataComponents.BOLT_CASTER_MAG.get(), pStack.get(ModDataComponents.BOLT_CASTER_MAG_MAX.get()));
+                }
                 if (pStack.get(ModDataComponents.COOLDOWN.get()) == 0f && isActive) {
-                    if (!pLevel.isClientSide) {
-                        pStack.set(ModDataComponents.BURST_AMOUNT.get(), (int) Modules.BOLT_CASTER.getGroup().get(Modules.Group.BURST_AMOUNT));
-                        pStack.set(ModDataComponents.FIRE_RATE.get(), (int) Modules.BOLT_CASTER.getGroup().get(Modules.Group.FIRE_RATE));
-                    }
+                    pStack.set(ModDataComponents.BURST_AMOUNT.get(), (int) Modules.BOLT_CASTER.getGroup().get(Modules.Group.BURST_AMOUNT));
+                    pStack.set(ModDataComponents.FIRE_RATE.get(), (int) Modules.BOLT_CASTER.getGroup().get(Modules.Group.FIRE_RATE));
                 }
                 if (pStack.get(ModDataComponents.BURST_AMOUNT.get()) > 0) {
                     useBoltCaster(pLevel, player, pStack);
@@ -268,14 +305,6 @@ public class AbstractMultiTool extends Item {
             default:
 
         }
-
-        if (!ToolMethods.isUsingTool(player)) {
-            pStack.set(ModDataComponents.ACTIVE.get(), false);
-            if (selected.equals(Modules.MINING_LASER.getName())) {
-                pStack.set(ModDataComponents.DESTROY_PROGRESS.get(), 0.0F);
-                pStack.set(ModDataComponents.LAST_BLOCKPOS.get(), new BlockPos(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE));
-            }
-        }
     }
 
     private void usePlasmaSpitter(Level world, Player player, ItemStack stack) {
@@ -287,18 +316,34 @@ public class AbstractMultiTool extends Item {
             return;
         }
 
+        if (world.isClientSide) player.playSound(ModSounds.PLASMA_SPITTER.get(), 0.5f, 1f);
         if (!world.isClientSide) {
             PlasmaSpitterEntity projectile = new PlasmaSpitterEntity(world, player);
             projectile.shootFromRotation(player, player.getRotationVector().x, player.getRotationVector().y, 0, (float) Modules.PLASMA_SPITTER.getGroup().get(Modules.Group.SPEED), (float) Modules.PLASMA_SPITTER.getGroup().get(Modules.Group.INACCURACY));
             world.addFreshEntity(projectile);
         }
 
-        if (world.isClientSide) player.playSound(ModSounds.PLASMA_SPITTER.get(), 0.5f, 1f);
         stack.set(ModDataComponents.FIRE_RATE.get(), 0);
         stack.set(ModDataComponents.COOLDOWN.get(), (int) Modules.BOLT_CASTER.getGroup().get(Modules.Group.COOLDOWN));
     }
 
+    private void reloadBoltCaster(Player player, ItemStack stack) {
+        int cur = stack.get(ModDataComponents.BOLT_CASTER_MAG.get());
+        int max = stack.get(ModDataComponents.PLASMA_SPITTER_MAG_MAX.get());
+        int rem = max - cur;
+        int reload_time = ((int) Modules.BOLT_CASTER.getGroup().get(Modules.Group.RELOAD_TIME) * (rem/max));
+
+        player.getCooldowns().addCooldown(this, reload_time);
+        stack.set(ModDataComponents.WAS_RELOADING.get(), true);
+        stack.set(ModDataComponents.BURST_AMOUNT.get(), 0);
+    }
+
     private void useBoltCaster(Level world, Player player, ItemStack stack) {
+        if (stack.get(ModDataComponents.BOLT_CASTER_MAG) <= 0) {
+            reloadBoltCaster(player, stack);
+            return;
+        }
+
         int fireRate = (int) Modules.BOLT_CASTER.getGroup().get(Modules.Group.FIRE_RATE);
         int currentTick = Math.min(stack.get(ModDataComponents.FIRE_RATE.get()) + 1, fireRate);
 
@@ -315,11 +360,14 @@ public class AbstractMultiTool extends Item {
 
         if (world.isClientSide) player.playSound(ModSounds.BOLT_CASTER.get(), 0.5f, 1f);
         stack.set(ModDataComponents.FIRE_RATE.get(), 0);
-        stack.set(ModDataComponents.BURST_AMOUNT.get(), stack.get(ModDataComponents.BURST_AMOUNT.get()) - 1);
+        stack.set(ModDataComponents.BURST_AMOUNT.get(), Math.max(stack.get(ModDataComponents.BURST_AMOUNT.get()) - 1, 0));
         stack.set(ModDataComponents.COOLDOWN.get(), (int) Modules.BOLT_CASTER.getGroup().get(Modules.Group.COOLDOWN));
+        stack.set(ModDataComponents.BOLT_CASTER_MAG.get(), Math.max(stack.get(ModDataComponents.BOLT_CASTER_MAG.get()) - 1, 0));
     }
 
     private void useMiningLaser(Level world, Player player, ItemStack stack) {
+        stack.set(ModDataComponents.HEAT.get(), Math.min(stack.get(ModDataComponents.HEAT.get()) + Constants.MULTITOOL_BASEHEAT, stack.get(ModDataComponents.HEAT_MAX.get())));
+
         EntityHitResult entityHitResult = VectorFunctions.getEntityLookingAt(player, player.blockInteractionRange());
         if (entityHitResult != null) {
             Entity entity = entityHitResult.getEntity();
@@ -329,13 +377,18 @@ public class AbstractMultiTool extends Item {
 
         BlockHitResult hit = VectorFunctions.getLookingAt(player, player.blockInteractionRange());
         BlockPos lastPos = stack.get(ModDataComponents.LAST_BLOCKPOS.get());
-        if (hit.getType() == HitResult.Type.MISS || !lastPos.equals(new BlockPos(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE)) && !lastPos.equals(hit.getBlockPos()) || !ToolMethods.canToolAffect(stack, world, hit.getBlockPos())) {
+        if (hit.getType() == HitResult.Type.MISS || !ToolMethods.canToolAffect(stack, world, hit.getBlockPos())) {
             stack.set(ModDataComponents.DESTROY_PROGRESS.get(), 0.0F);
             stack.set(ModDataComponents.LAST_BLOCKPOS.get(), new BlockPos(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE));
             return;
         }
+
+        if (!lastPos.equals(hit.getBlockPos())) {
+            stack.set(ModDataComponents.DESTROY_PROGRESS.get(), 0.0F);
+        }
+
         BlockPos pos = hit.getBlockPos();
-        stack.set(ModDataComponents.LAST_BLOCKPOS.get(), new BlockPos(pos.getX(), pos.getY(), pos.getZ()));
+        stack.set(ModDataComponents.LAST_BLOCKPOS.get(), pos);
 
         ImmutableList<BlockPos> area = player.isCrouching() ? ImmutableList.of(pos) : VectorFunctions.getBreakableArea(stack, pos, player, (int) Modules.MINING_LASER.getGroup().get(Modules.Group.RADIUS));
         if (area.isEmpty()) {

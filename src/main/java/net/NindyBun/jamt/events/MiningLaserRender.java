@@ -53,11 +53,12 @@ public class MiningLaserRender {
         float ticks = Minecraft.getInstance().getFrameTime();
         Vec3 pos = player.getEyePosition(ticks);
         HitResult trace = player.pick(range, 0F, false);
+        ItemStack tool = ToolMethods.getTool(player);
 
-        drawLaser(event, pos, trace, player, ticks);
+        drawLaser(event, pos, trace, player, ticks, tool);
     }
 
-    private static void drawLaser(RenderLevelStageEvent event, Vec3 from, HitResult trace, Player player, float ticks) {
+    private static void drawLaser(RenderLevelStageEvent event, Vec3 from, HitResult trace, Player player, float ticks, ItemStack tool) {
         InteractionHand activeHand;
         if (player.getMainHandItem().getItem() instanceof AbstractMultiTool) {
             activeHand = InteractionHand.MAIN_HAND;
@@ -86,9 +87,21 @@ public class MiningLaserRender {
         Matrix3f matrixNormal = matrixstack$entry.normal();
         Matrix4f positionMatrix = matrixstack$entry.pose();
 
-        drawBeam(0, 0, 0, buffer.getBuffer(LaserRenderTypes.LASER_GLOW), positionMatrix, matrixNormal, 0.02f * 3.5f, activeHand, distance, 0.5, 1, ticks, 1f, 0.3f, 0.3f,0.7f);
+        float heat = tool.get(ModDataComponents.HEAT.get());
+        float heat_max = tool.get(ModDataComponents.HEAT_MAX.get());
+        float hD = heat / heat_max;
 
-        drawBeam(0, 0, 0, buffer.getBuffer(LaserRenderTypes.LASER), positionMatrix, matrixNormal, 0.02f, activeHand, distance, gameTime, gameTime + distance * 1.5, ticks, 1f, 0.8f, 0.5f,1f);
+        float r1 = hD*0.75f + 0.25f;
+        float g1 = 1.0f-hD;
+        float b1 = 0.25f;
+
+        float r2 = hD*0.25f + 0.75f;
+        float g2 = 1.0f-(hD*0.25f);
+        float b2 = 0.75f;
+
+        drawBeam(0, 0, 0, buffer.getBuffer(LaserRenderTypes.LASER_GLOW), positionMatrix, matrixNormal, 0.02f * 3.5f, activeHand, distance, 0.5, 1, ticks, r1, g1, b1,0.7f);
+
+        drawBeam(0, 0, 0, buffer.getBuffer(LaserRenderTypes.LASER), positionMatrix, matrixNormal, 0.02f, activeHand, distance, gameTime, gameTime + distance * 1.5, ticks, r2, g2, b2,1f);
         matrix.popPose();
         buffer.endBatch();
     }

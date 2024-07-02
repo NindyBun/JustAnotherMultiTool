@@ -21,21 +21,19 @@ public class VectorFunctions {
         Level world = player.level();
         Vec3 look = player.getLookAngle();
         Vec3 start = new Vec3(player.getX(), player.getY() + player.getEyeHeight(), player.getZ());
-        EntityHitResult entityhitresult = null;
 
         for (double i = 0.5; i < range; i+= 0.5) {
             Vec3 end = new Vec3(player.getX() + look.x * i, player.getY() + player.getEyeHeight() + look.y * i, player.getZ() + look.z * i);
-            EntityHitResult entityhitresult1 = ProjectileUtil.getEntityHitResult(
+            EntityHitResult entityhitresult = ProjectileUtil.getEntityHitResult(
                     player.level(), player, start, end, new AABB(start, end).inflate(1.0), p_156765_ -> !p_156765_.isSpectator(), 0.0F
             );
-            if (entityhitresult1 == null || entityhitresult1.getType() != HitResult.Type.ENTITY || !entityhitresult1.getEntity().isAlive()) continue;
+            if (entityhitresult == null || entityhitresult.getType() != HitResult.Type.ENTITY || !entityhitresult.getEntity().isAlive()) continue;
             BlockHitResult blockHitResult = world.clip(new ClipContext(start, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
             if (blockHitResult.getType() == HitResult.Type.BLOCK) continue;
-            entityhitresult = entityhitresult1;
-            break;
+            return entityhitresult;
         }
 
-        return entityhitresult;
+        return null;
     }
 
     public static BlockHitResult getLookingAt(Player player, double range) {

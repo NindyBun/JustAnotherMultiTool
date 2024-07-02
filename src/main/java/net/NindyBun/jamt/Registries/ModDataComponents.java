@@ -6,7 +6,9 @@ import net.NindyBun.jamt.JustAnotherMultiTool;
 import net.NindyBun.jamt.Tools.Codecs;
 import net.NindyBun.jamt.containers.MultiToolInventory;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.component.PatchedDataComponentMap;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.util.ExtraCodecs;
@@ -25,6 +27,12 @@ public class ModDataComponents {
             () -> DataComponentType.<Integer>builder().persistent(ExtraCodecs.intRange(0, Integer.MAX_VALUE)).networkSynchronized(ByteBufCodecs.VAR_INT).build());
 
     public static final Supplier<DataComponentType<Integer>> ENERGY_MAX = DATA_COMPONENT.register("energy_max",
+            () -> DataComponentType.<Integer>builder().persistent(ExtraCodecs.intRange(0, Integer.MAX_VALUE)).networkSynchronized(ByteBufCodecs.VAR_INT).build());
+
+    public static final Supplier<DataComponentType<Integer>> HEAT = DATA_COMPONENT.register("heat",
+            () -> DataComponentType.<Integer>builder().persistent(ExtraCodecs.intRange(0, Integer.MAX_VALUE)).networkSynchronized(ByteBufCodecs.VAR_INT).build());
+
+    public static final Supplier<DataComponentType<Integer>> HEAT_MAX = DATA_COMPONENT.register("heat_max",
             () -> DataComponentType.<Integer>builder().persistent(ExtraCodecs.intRange(0, Integer.MAX_VALUE)).networkSynchronized(ByteBufCodecs.VAR_INT).build());
 
     public static final Supplier<DataComponentType<List<MultiToolInventory.MultiToolInventoryCODEC>>> MULTITOOL_INVENTORY = DATA_COMPONENT.register("multitool_inventory",
@@ -52,6 +60,21 @@ public class ModDataComponents {
             () -> DataComponentType.<String>builder().persistent(Codec.STRING).networkSynchronized(ByteBufCodecs.STRING_UTF8).build());
 
     public static final Supplier<DataComponentType<Boolean>> ACTIVE = DATA_COMPONENT.register("active",
+            () -> DataComponentType.<Boolean>builder().persistent(Codec.BOOL).networkSynchronized(ByteBufCodecs.BOOL).build());
+
+    public static final Supplier<DataComponentType<Integer>> BOLT_CASTER_MAG = DATA_COMPONENT.register("bolt_caster_mag",
+            () -> DataComponentType.<Integer>builder().persistent(ExtraCodecs.intRange(0, Integer.MAX_VALUE)).networkSynchronized(ByteBufCodecs.VAR_INT).build());
+
+    public static final Supplier<DataComponentType<Integer>> BOLT_CASTER_MAG_MAX = DATA_COMPONENT.register("bolt_caster_mag_max",
+            () -> DataComponentType.<Integer>builder().persistent(ExtraCodecs.intRange(0, Integer.MAX_VALUE)).networkSynchronized(ByteBufCodecs.VAR_INT).build());
+
+    public static final Supplier<DataComponentType<Integer>> PLASMA_SPITTER_MAG = DATA_COMPONENT.register("plasma_spitter_mag",
+            () -> DataComponentType.<Integer>builder().persistent(ExtraCodecs.intRange(0, Integer.MAX_VALUE)).networkSynchronized(ByteBufCodecs.VAR_INT).build());
+
+    public static final Supplier<DataComponentType<Integer>> PLASMA_SPITTER_MAG_MAX = DATA_COMPONENT.register("plasma_spitter_mag_max",
+            () -> DataComponentType.<Integer>builder().persistent(ExtraCodecs.intRange(0, Integer.MAX_VALUE)).networkSynchronized(ByteBufCodecs.VAR_INT).build());
+
+    public static final Supplier<DataComponentType<Boolean>> WAS_RELOADING = DATA_COMPONENT.register("was_reloading",
             () -> DataComponentType.<Boolean>builder().persistent(Codec.BOOL).networkSynchronized(ByteBufCodecs.BOOL).build());
 
     public static void register(IEventBus eventBus) {

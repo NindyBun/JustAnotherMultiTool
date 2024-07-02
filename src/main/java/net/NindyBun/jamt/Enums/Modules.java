@@ -1,13 +1,22 @@
 package net.NindyBun.jamt.Enums;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.NindyBun.jamt.JustAnotherMultiTool;
 import net.NindyBun.jamt.Registries.ModItems;
+import net.NindyBun.jamt.containers.MultiToolInventory;
+import net.minecraft.core.component.DataComponentMap;
+import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.component.PatchedDataComponentMap;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
+import javax.annotation.Nullable;
 import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Supplier;
 
 public enum Modules {
@@ -28,6 +37,8 @@ public enum Modules {
             .put(Group.COOLDOWN, 12)
             .put(Group.SPEED, 3.14f)
             .put(Group.INACCURACY, 1.0f)
+            .put(Group.MAG_SIZE, 30)
+            .put(Group.RELOAD_TIME, 30)
     ),
     PLASMA_SPITTER("plasma_spitter", ModItems.PLASMA_SPITTER, "tool", new Group()
             .put(Group.GROUP_NAME, "plasma_spitter")
@@ -37,6 +48,8 @@ public enum Modules {
             .put(Group.COOLDOWN, 5)
             .put(Group.SPEED,  1f*3.14f/3f)
             .put(Group.INACCURACY, 2f)
+            .put(Group.MAG_SIZE, 45)
+            .put(Group.RELOAD_TIME, 30)
     ),
     ;
 
@@ -87,6 +100,8 @@ public enum Modules {
         public static final String MINING_SPEED = "mining_speed";
         public static final String RADIUS = "radius";
         public static final String INACCURACY = "inaccuracy";
+        public static final String MAG_SIZE = "mag_size";
+        public static final String RELOAD_TIME = "reload_time";
 
         public Group() {}
 
